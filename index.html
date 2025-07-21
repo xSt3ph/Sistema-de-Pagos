@@ -1,767 +1,810 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Registro de Pagos - Evento</title>
-    <style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Registro de Pagos - Evento</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 90vh;
+    }
+    .header {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+    .header h1 {
+        margin: 0;
+        font-size: 2.5em;
+        font-weight: 300;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        user-select: none;
+    }
+    .header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1em;
+        user-select: none;
+    }
+    .tabs {
+        display: flex;
+        background: #f8f9fa;
+        border-bottom: 3px solid #e9ecef;
+        flex-wrap: wrap;
+        user-select: none;
+    }
+    .tab {
+        flex: 1;
+        padding: 18px 12px;
+        text-align: center;
+        cursor: pointer;
+        background: #f8f9fa;
+        border: none;
+        font-size: 1.1em;
+        font-weight: 600;
+        color: #495057;
+        transition: all 0.3s ease;
+        position: relative;
+        min-width: 100px;
+        user-select: none;
+    }
+    .tab:hover,
+    .tab:focus {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        outline: none;
+    }
+    .tab.active {
+        background: white;
+        color: #2c3e50;
+        cursor: default;
+        transform: none;
+    }
+    .tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .tab-content {
+        display: none;
+        padding: 20px;
+        overflow-x: auto;
+        flex-grow: 1;
+        background: #fff;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .table-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        overflow-x: auto;
+        margin-bottom: 20px;
+    }
+    .table-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+        font-weight: 600;
+        font-size: 1.4em;
+        user-select: none;
+    }
+    .summary-card {
+        background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+        user-select: none;
+    }
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .summary-item {
+        background: rgba(255,255,255,0.2);
+        padding: 15px;
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+    }
+    .summary-item h3 {
+        margin: 0 0 5px 0;
+        font-size: 1.8em;
+        font-weight: bold;
+    }
+    .summary-item p {
+        margin: 0;
+        opacity: 0.9;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        min-width: 720px;
+        table-layout: fixed;
+    }
+    th {
+        background: #f8f9fa;
+        padding: 14px 10px;
+        text-align: left;
+        font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #e9ecef;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        user-select: none;
+    }
+    td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+    tr:hover {
+        background: #f8f9fa;
+    }
+    input, select {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    input:focus, select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 6px 2px rgba(102, 126, 234, 0.4);
+        background: #f0f4ff;
+    }
+    select.status-pagado {
+        background: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+    select.status-pendiente {
+        background: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
+    select.status-cancelado {
+        background: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+    .add-row-btn {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1em;
+        transition: background 0.3s ease;
+        margin: 10px 0 20px 0;
+        user-select: none;
+    }
+    .add-row-btn:hover,
+    .add-row-btn:focus {
+        background: #218838;
+        outline: none;
+    }
+    .download-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 22px;
+        border-radius: 50px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+        transition: all 0.3s ease;
+        z-index: 999;
+        user-select: none;
+    }
+    .download-btn:hover,
+    .download-btn:focus {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+        outline: none;
+    }
+    .download-btn.secondary {
+        bottom: 90px;
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    }
+    /* Responsive para móviles */
+    @media (max-width: 768px) {
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            padding: 15px 10px;
         }
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            min-height: 90vh;
-        }
-        .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-            flex-shrink: 0;
+            border-radius: 10px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
         }
         .header h1 {
-            margin: 0;
-            font-size: 2.5em;
-            font-weight: 300;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            user-select: none;
+            font-size: 1.8em;
         }
         .header p {
-            margin: 10px 0 0 0;
-            opacity: 0.9;
-            font-size: 1.1em;
-            user-select: none;
+            font-size: 1em;
         }
         .tabs {
-            display: flex;
-            background: #f8f9fa;
-            border-bottom: 3px solid #e9ecef;
-            flex-wrap: wrap;
-            user-select: none;
+            flex-direction: column;
+            border-bottom: none;
         }
         .tab {
-            flex: 1;
-            padding: 18px 12px;
-            text-align: center;
-            cursor: pointer;
-            background: #f8f9fa;
-            border: none;
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #495057;
-            transition: all 0.3s ease;
-            position: relative;
-            min-width: 100px;
-            user-select: none;
-        }
-        .tab:hover,
-        .tab:focus {
-            background: #e9ecef;
-            transform: translateY(-2px);
-            outline: none;
-        }
-        .tab.active {
-            background: white;
-            color: #2c3e50;
-            cursor: default;
-            transform: none;
+            flex: none;
+            padding: 12px 10px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 1em;
         }
         .tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -3px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: none;
         }
         .tab-content {
-            display: none;
-            padding: 20px;
-            overflow-x: auto;
-            flex-grow: 1;
-            background: #fff;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            overflow-x: auto;
-            margin-bottom: 20px;
-        }
-        .table-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            border-radius: 10px 10px 0 0;
-            font-weight: 600;
-            font-size: 1.4em;
-            user-select: none;
-        }
-        .summary-card {
-            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-            user-select: none;
-        }
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        .summary-item {
-            background: rgba(255,255,255,0.2);
-            padding: 15px;
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-        }
-        .summary-item h3 {
-            margin: 0 0 5px 0;
-            font-size: 1.8em;
-            font-weight: bold;
-        }
-        .summary-item p {
-            margin: 0;
-            opacity: 0.9;
+            padding: 15px 5px;
         }
         table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            min-width: 720px;
-            table-layout: fixed;
+            min-width: 100%;
         }
-        th {
-            background: #f8f9fa;
-            padding: 14px 10px;
-            text-align: left;
-            font-weight: 600;
-            color: #2c3e50;
-            border-bottom: 2px solid #e9ecef;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-            user-select: none;
+        th, td {
+            padding: 8px 5px;
+            font-size: 13px;
         }
-        td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #e9ecef;
-            vertical-align: middle;
-        }
-        tr:hover {
-            background: #f8f9fa;
-        }
-        input, select {
-            width: 100%;
-            padding: 6px 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 6px 2px rgba(102, 126, 234, 0.4);
-            background: #f0f4ff;
-        }
-        select.status-pagado {
-            background: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        select.status-pendiente {
-            background: #fff3cd;
-            border-color: #ffeaa7;
-            color: #856404;
-        }
-        select.status-cancelado {
-            background: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
+        .summary-grid {
+            grid-template-columns: 1fr;
         }
         .add-row-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1em;
-            transition: background 0.3s ease;
-            margin: 10px 0 20px 0;
-            user-select: none;
-        }
-        .add-row-btn:hover,
-        .add-row-btn:focus {
-            background: #218838;
-            outline: none;
+            width: 100%;
+            font-size: 1.1em;
+            padding: 14px 0;
         }
         .download-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 22px;
-            border-radius: 50px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
-            transition: all 0.3s ease;
-            z-index: 999;
-            user-select: none;
-        }
-        .download-btn:hover,
-        .download-btn:focus {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.35);
-            outline: none;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 18px;
+            font-size: 0.9em;
         }
         .download-btn.secondary {
-            bottom: 90px;
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            bottom: 75px;
+            right: 20px;
+            padding: 12px 18px;
         }
-        /* Responsive para móviles */
-        @media (max-width: 768px) {
-            body {
-                padding: 15px 10px;
-            }
-            .container {
-                border-radius: 10px;
-                box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-            }
-            .header h1 {
-                font-size: 1.8em;
-            }
-            .header p {
-                font-size: 1em;
-            }
-            .tabs {
-                flex-direction: column;
-                border-bottom: none;
-            }
-            .tab {
-                flex: none;
-                padding: 12px 10px;
-                border-bottom: 1px solid #e9ecef;
-                font-size: 1em;
-            }
-            .tab.active::after {
-                display: none;
-            }
-            .tab-content {
-                padding: 15px 5px;
-            }
-            table {
-                min-width: 100%;
-            }
-            th, td {
-                padding: 8px 5px;
-                font-size: 13px;
-            }
-            .summary-grid {
-                grid-template-columns: 1fr;
-            }
-            .add-row-btn {
-                width: 100%;
-                font-size: 1.1em;
-                padding: 14px 0;
-            }
-            .download-btn {
-                bottom: 20px;
-                right: 20px;
-                padding: 12px 18px;
-                font-size: 0.9em;
-            }
-            .download-btn.secondary {
-                bottom: 75px;
-                right: 20px;
-                padding: 12px 18px;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
-    <div class="container" role="main">
-        <header class="header">
-            <h1>🎉 Registro de Pagos del Evento</h1>
-            <p>Sistema de control de pagos para chivas y remate</p>
-        </header>
+<div class="container" role="main">
+    <header class="header">
+        <h1>🎉 Registro de Pagos del Evento</h1>
+        <p>Sistema de control de pagos para chivas y remate</p>
+    </header>
 
-        <nav class="tabs" role="tablist" aria-label="Pestañas de control de pagos">
-            <button class="tab active" data-tab="chiva1" role="tab" aria-selected="true" tabindex="0" aria-controls="chiva1">🚌 Chiva 1</button>
-            <button class="tab" data-tab="chiva2" role="tab" aria-selected="false" tabindex="-1" aria-controls="chiva2">🚌 Chiva 2</button>
-            <button class="tab" data-tab="chiva3" role="tab" aria-selected="false" tabindex="-1" aria-controls="chiva3">🚌 Chiva 3</button>
-            <button class="tab" data-tab="remate" role="tab" aria-selected="false" tabindex="-1" aria-controls="remate">🏆 Remate</button>
-        </nav>
+    <nav class="tabs" role="tablist" aria-label="Pestañas de control de pagos">
+        <button class="tab active" data-tab="chiva1" role="tab" aria-selected="true" tabindex="0" aria-controls="chiva1">🚌 Chiva 1</button>
+        <button class="tab" data-tab="chiva2" role="tab" aria-selected="false" tabindex="-1" aria-controls="chiva2">🚌 Chiva 2</button>
+        <button class="tab" data-tab="chiva3" role="tab" aria-selected="false" tabindex="-1" aria-controls="chiva3">🚌 Chiva 3</button>
+        <button class="tab" data-tab="remate" role="tab" aria-selected="false" tabindex="-1" aria-controls="remate">🏆 Remate</button>
+    </nav>
 
-        <section id="chiva1" class="tab-content active" role="tabpanel" tabindex="0" aria-labelledby="chiva1-tab">
-            <div class="summary-card" aria-live="polite" aria-atomic="true" aria-relevant="all">
-                <div class="table-header">📊 Resumen Chiva 1</div>
-                <div class="summary-grid">
-                    <div class="summary-item"><h3 id="total-chiva1">0</h3><p>Total Personas</p></div>
-                    <div class="summary-item"><h3 id="pagados-chiva1">0</h3><p>Pagados</p></div>
-                    <div class="summary-item"><h3 id="pendientes-chiva1">0</h3><p>Pendientes</p></div>
-                    <div class="summary-item"><h3 id="ingresos-chiva1">$0</h3><p>Ingresos</p></div>
-                </div>
+    <section id="chiva1" class="tab-content active" role="tabpanel" tabindex="0" aria-labelledby="chiva1-tab">
+        <div class="summary-card" aria-live="polite" aria-atomic="true" aria-relevant="all">
+            <div class="table-header">📊 Resumen Chiva 1</div>
+            <div class="summary-grid">
+                <div class="summary-item"><h3 id="total-chiva1">0</h3><p>Total Personas</p></div>
+                <div class="summary-item"><h3 id="pagados-chiva1">0</h3><p>Pagados</p></div>
+                <div class="summary-item"><h3 id="pendientes-chiva1">0</h3><p>Pendientes</p></div>
+                <div class="summary-item"><h3 id="ingresos-chiva1">$0</h3><p>Ingresos</p></div>
             </div>
-            <div class="table-container" role="region" aria-label="Tabla de pagos Chiva 1">
-                <table id="table-chiva1" aria-describedby="desc-chiva1" tabindex="0">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Nombre Completo</th>
-                            <th scope="col">Teléfono</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Valor</th>
-                            <th scope="col">Estado</th>
-                            <th scope="col">Fecha Pago</th>
-                            <th scope="col">Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                <button class="add-row-btn" type="button" aria-label="Agregar persona a Chiva 1" onclick="addRow('chiva1')">➕ Agregar Persona</button>
-            </div>
-        </section>
+        </div>
+        <div class="table-container" role="region" aria-label="Tabla de pagos Chiva 1">
+            <table id="table-chiva1" aria-describedby="desc-chiva1" tabindex="0">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Nombre Completo</th>
+                        <th scope="col">Teléfono</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Valor</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Fecha Pago</th>
+                        <th scope="col">Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button class="add-row-btn" type="button" aria-label="Agregar persona a Chiva 1" onclick="addRow('chiva1')">➕ Agregar Persona</button>
+        </div>
+    </section>
 
-        <section id="chiva2" class="tab-content" role="tabpanel" tabindex="0" aria-labelledby="chiva2-tab">
-            <div class="summary-card" aria-live="polite" aria-atomic="true" aria-relevant="all">
-                <div class="table-header">📊 Resumen Chiva 2</div>
-                <div class="summary-grid">
-                    <div class="summary-item"><h3 id="total-chiva2">0</h3><p>Total Personas</p></div>
-                    <div class="summary-item"><h3 id="pagados-chiva2">0</h3><p>Pagados</p></div>
-                    <div class="summary-item"><h3 id="pendientes-chiva2">0</h3><p>Pendientes</p></div>
-                    <div class="summary-item"><h3 id="ingresos-chiva2">$0</h3><p>Ingresos</p></div>
-                </div>
+    <section id="chiva2" class="tab-content" role="tabpanel" tabindex="0" aria-labelledby="chiva2-tab">
+        <div class="summary-card" aria-live="polite" aria-atomic="true" aria-relevant="all">
+            <div class="table-header">📊 Resumen Chiva 2</div>
+            <div class="summary-grid">
+                <div class="summary-item"><h3 id="total-chiva2">0</h3><p>Total Personas</p></div>
+                <div class="summary-item"><h3 id="pagados-chiva2">0</h3><p>Pagados</p></div>
+                <div class="summary-item"><h3 id="pendientes-chiva2">0</h3><p>Pendientes</p></div>
+                <div class="summary-item"><h3 id="ingresos-chiva2">$0</h3><p>Ingresos</p></div>
             </div>
-            <div class="table-container" role="region" aria-label="Tabla de pagos Chiva 2">
-                <table id="table-chiva2" aria-describedby="desc-chiva2" tabindex="0">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Nombre Completo</th>
-                            <th scope="col">Teléfono</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Valor</th>
-                            <th scope="col">Estado</th>
-                            <th scope="col">Fecha Pago</th>
-                            <th scope="col">Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                <button class="add-row-btn" type="button" aria-label="Agregar persona a Chiva 2" onclick="addRow('chiva2')">➕ Agregar Persona</button>
-            </div>
-        </section>
+        </div>
+        <div class="table-container" role="region" aria-label="Tabla de pagos Chiva 2">
+            <table id="table-chiva2" aria-describedby="desc-chiva2" tabindex="0">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Nombre Completo</th>
+                        <th scope="col">Teléfono</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Valor</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Fecha Pago</th>
+                        <th scope="col">Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button class="add-row-btn" type="button" aria-label="Agregar persona a Chiva 2" onclick="addRow('chiva2')">➕ Agregar Persona</button>
+        </div>
+    </section>
 
-        <section id="chiva3" class="tab-content" role="tabpanel" tabindex="0" aria-labelledby="chiva3-tab">
-            <div class="summary-card" aria-live="polite" aria-atomic="true" aria-relevant="all">
-                <div class="table-header">📊 Resumen Chiva 3</div>
-                <div class="summary-grid">
-                    <div class="summary-item"><h3 id="total-chiva3">0</h3><p>Total Personas</p></div>
-                    <div class="summary-item"><h3 id="pagados-chiva3">0</h3><p>Pagados</p></div>
-                    <div class="summary-item"><h3 id="pendientes-chiva3">0</h3><p>Pendientes</p></div>
-                    <div class="summary-item"><h3 id="ingresos-chiva3">$0</h3><p>Ingresos</p></div>
-                </div>
+    <section id="chiva3" class="tab-content" role="tabpanel" tabindex="0" aria-labelledby="chiva3-tab">
+        <div class="summary-card" aria-live="polite" aria-atomic="true" aria-relevant="all">
+            <div class="table-header">📊 Resumen Chiva 3</div>
+            <div class="summary-grid">
+                <div class="summary-item"><h3 id="total-chiva3">0</h3><p>Total Personas</p></div>
+                <div class="summary-item"><h3 id="pagados-chiva3">0</h3><p>Pagados</p></div>
+                <div class="summary-item"><h3 id="pendientes-chiva3">0</h3><p>Pendientes</p></div>
+                <div class="summary-item"><h3 id="ingresos-chiva3">$0</h3><p>Ingresos</p></div>
             </div>
-            <div class="table-container" role="region" aria-label="Tabla de pagos Chiva 3">
-                <table id="table-chiva3" aria-describedby="desc-chiva3" tabindex="0">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Nombre Completo</th>
-                            <th scope="col">Teléfono</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Valor</th>
-                            <th scope="col">Estado</th>
-                            <th scope="col">Fecha Pago</th>
-                            <th scope="col">Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                <button class="add-row-btn" type="button" aria-label="Agregar persona a Chiva 3" onclick="addRow('chiva3')">➕ Agregar Persona</button>
+        </div>
+        <div class="table-container" role="region" aria-label="Tabla de pagos Chiva 3">
+            <table id="table-chiva3" aria-describedby="desc-chiva3" tabindex="0">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Nombre Completo</th>
+                        <th scope="col">Teléfono</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Valor</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Fecha Pago</th>
+                        <th scope="col">Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button class="add-row-btn" type="button" aria-label="Agregar persona a Chiva 3" onclick="addRow('chiva3')">➕ Agregar Persona</button>
+        </div>
+    </section>
+
+    <section id="remate" class="tab-content" role="tabpanel" tabindex="0" aria-labelledby="remate-tab">
+        <div class="summary-card" aria-live="polite" aria-atomic="true" aria-relevant="all">
+            <div class="table-header">📊 Resumen Remate</div>
+            <div class="summary-grid">
+                <div class="summary-item"><h3 id="total-remate">0</h3><p>Total Personas</p></div>
+                <div class="summary-item"><h3 id="pagados-remate">0</h3><p>Pagados</p></div>
+                <div class="summary-item"><h3 id="pendientes-remate">0</h3><p>Pendientes</p></div>
+                <div class="summary-item"><h3 id="ingresos-remate">$0</h3><p>Ingresos</p></div>
             </div>
-        </section>
+        </div>
+        <div class="table-container" role="region" aria-label="Tabla de pagos Remate">
+            <table id="table-remate" aria-describedby="desc-remate" tabindex="0">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Nombre Completo</th>
+                        <th scope="col">Teléfono</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Valor</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Fecha Pago</th>
+                        <th scope="col">Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button class="add-row-btn" type="button" aria-label="Agregar persona a Remate" onclick="addRow('remate')">➕ Agregar Persona</button>
+        </div>
+    </section>
 
-        <section id="remate" class="tab-content" role="tabpanel" tabindex="0" aria-labelledby="remate-tab">
-            <div class="summary-card" aria-live="polite" aria-atomic="true" aria-relevant="all">
-                <div class="table-header">📊 Resumen Remate</div>
-                <div class="summary-grid">
-                    <div class="summary-item"><h3 id="total-remate">0</h3><p>Total Personas</p></div>
-                    <div class="summary-item"><h3 id="pagados-remate">0</h3><p>Pagados</p></div>
-                    <div class="summary-item"><h3 id="pendientes-remate">0</h3><p>Pendientes</p></div>
-                    <div class="summary-item"><h3 id="ingresos-remate">$0</h3><p>Ingresos</p></div>
-                </div>
-            </div>
-            <div class="table-container" role="region" aria-label="Tabla de pagos Remate">
-                <table id="table-remate" aria-describedby="desc-remate" tabindex="0">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Nombre Completo</th>
-                            <th scope="col">Teléfono</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Valor Ofrecido</th>
-                            <th scope="col">Estado</th>
-                            <th scope="col">Fecha Pago</th>
-                            <th scope="col">Artículo / Premio</th>
-                            <th scope="col">Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                <button class="add-row-btn" type="button" aria-label="Agregar persona a Remate" onclick="addRow('remate')">➕ Agregar Persona</button>
-            </div>
-        </section>
+    <button id="saveBtn" class="download-btn" aria-label="Guardar datos en la nube">💾 Guardar</button>
+    <button id="exportBtn" class="download-btn secondary" aria-label="Exportar datos a Excel">📥 Exportar Excel</button>
+</div>
 
-        <button id="btnDownload" class="download-btn" aria-label="Descargar tabla actual en formato CSV">💾 Descargar CSV</button>
-        <button id="btnClear" class="download-btn secondary" aria-label="Limpiar todos los datos guardados">🧹 Limpiar Datos</button>
-    </div>
+<script>
+    // Cambia aquí por la URL del deploy de tu Google Apps Script Web App (modo POST)
+    const API_URL = "https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxx/exec";
 
-    <script>
-        // Gestión de pestañas accesibles
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
+    // Para guardar y cargar datos localmente durante la sesión si quieres (opcional)
+    // const LOCAL_STORAGE_KEY = "pagosEventoData";
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                activateTab(tab.getAttribute('data-tab'));
+    // Estado de los datos (objeto con arrays para cada pestaña)
+    let data = {
+        chiva1: [],
+        chiva2: [],
+        chiva3: [],
+        remate: []
+    };
+
+    // Tab switching
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            if (tab.classList.contains('active')) return;
+            // Cambiar activo
+            tabs.forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+                t.setAttribute('tabindex', '-1');
             });
-            tab.addEventListener('keydown', (e) => {
-                let index = Array.from(tabs).indexOf(e.target);
-                if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){
-                    e.preventDefault();
-                    index = (index + 1) % tabs.length;
-                    tabs[index].focus();
-                } else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){
-                    e.preventDefault();
-                    index = (index - 1 + tabs.length) % tabs.length;
-                    tabs[index].focus();
-                } else if(e.key === 'Home'){
-                    e.preventDefault();
-                    tabs[0].focus();
-                } else if(e.key === 'End'){
-                    e.preventDefault();
-                    tabs[tabs.length - 1].focus();
-                } else if(e.key === 'Enter' || e.key === ' '){
-                    e.preventDefault();
-                    activateTab(e.target.getAttribute('data-tab'));
-                }
-            });
-        });
-
-        function activateTab(tabName){
-            tabs.forEach(tab => {
-                if(tab.getAttribute('data-tab') === tabName){
-                    tab.classList.add('active');
-                    tab.setAttribute('aria-selected', 'true');
-                    tab.setAttribute('tabindex', '0');
-                } else {
-                    tab.classList.remove('active');
-                    tab.setAttribute('aria-selected', 'false');
-                    tab.setAttribute('tabindex', '-1');
-                }
-            });
+            tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
+            tab.setAttribute('tabindex', '0');
+            // Mostrar contenido correspondiente
+            const target = tab.dataset.tab;
             tabContents.forEach(tc => {
-                if(tc.id === tabName){
+                if(tc.id === target){
                     tc.classList.add('active');
                     tc.setAttribute('tabindex', '0');
-                    tc.focus();
                 } else {
                     tc.classList.remove('active');
                     tc.setAttribute('tabindex', '-1');
                 }
             });
-        }
+        });
+    });
 
-        // Función para colorear select según estado
-        function updateStatusClass(select) {
-            select.classList.remove('status-pagado', 'status-pendiente', 'status-cancelado');
-            if(select.value === 'pagado') select.classList.add('status-pagado');
-            else if(select.value === 'pendiente') select.classList.add('status-pendiente');
-            else if(select.value === 'cancelado') select.classList.add('status-cancelado');
-        }
+    // Agregar fila a tabla
+    function addRow(tab) {
+        const tableBody = document.querySelector(`#table-${tab} tbody`);
+        const index = tableBody.children.length + 1;
+        const row = document.createElement('tr');
 
-        // Actualiza resumen para una pestaña dada
-        function updateResumen(tab) {
-            const tbody = document.querySelector(`#table-${tab} tbody`);
-            const rows = tbody.rows;
-            let total = rows.length;
-            let pagados = 0;
-            let pendientes = 0;
-            let ingresos = 0;
+        // Nombre completo
+        const nameTd = document.createElement('td');
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.placeholder = 'Nombre completo';
+        nameInput.setAttribute('aria-label', 'Nombre completo');
+        nameTd.appendChild(nameInput);
 
-            for(let row of rows){
-                const estado = row.querySelector('select');
-                const valorInput = row.querySelector('input[type="number"]');
-                if(!estado || !valorInput) continue;
-                if(estado.value === 'pagado') {
-                    pagados++;
-                    ingresos += parseFloat(valorInput.value) || 0;
-                } else if(estado.value === 'pendiente') {
-                    pendientes++;
-                }
-            }
+        // Teléfono
+        const phoneTd = document.createElement('td');
+        const phoneInput = document.createElement('input');
+        phoneInput.type = 'tel';
+        phoneInput.placeholder = 'Teléfono';
+        phoneInput.setAttribute('aria-label', 'Teléfono');
+        phoneTd.appendChild(phoneInput);
 
-            document.getElementById(`total-${tab}`).textContent = total;
-            document.getElementById(`pagados-${tab}`).textContent = pagados;
-            document.getElementById(`pendientes-${tab}`).textContent = pendientes;
-            document.getElementById(`ingresos-${tab}`).textContent = `$${ingresos.toLocaleString('es-CO')}`;
-        }
+        // Email
+        const emailTd = document.createElement('td');
+        const emailInput = document.createElement('input');
+        emailInput.type = 'email';
+        emailInput.placeholder = 'Correo electrónico';
+        emailInput.setAttribute('aria-label', 'Correo electrónico');
+        emailTd.appendChild(emailInput);
 
-        // Guarda datos en localStorage
-        function saveData(tab) {
-            const tbody = document.querySelector(`#table-${tab} tbody`);
-            const rows = tbody.rows;
-            const data = [];
-            for(let row of rows){
-                const cells = row.querySelectorAll('td');
-                const inputs = row.querySelectorAll('input, select');
-                let rowData = [];
-                for(let i=1; i < cells.length; i++){ // omitimos índice (col 0)
-                    const input = inputs[i-1];
-                    if(input){
-                        if(input.tagName === 'SELECT'){
-                            rowData.push(input.value);
-                        } else {
-                            rowData.push(input.value.trim());
-                        }
-                    } else {
-                        rowData.push(cells[i].textContent.trim());
-                    }
-                }
-                data.push(rowData);
-            }
-            localStorage.setItem(`data-${tab}`, JSON.stringify(data));
-        }
+        // Valor
+        const valorTd = document.createElement('td');
+        const valorInput = document.createElement('input');
+        valorInput.type = 'number';
+        valorInput.min = '0';
+        valorInput.placeholder = 'Valor';
+        valorInput.setAttribute('aria-label', 'Valor pagado');
+        valorTd.appendChild(valorInput);
 
-        // Carga datos de localStorage
-        function loadData(tab) {
-            const stored = localStorage.getItem(`data-${tab}`);
-            if(!stored) return;
-            const data = JSON.parse(stored);
-            const tbody = document.querySelector(`#table-${tab} tbody`);
-            tbody.innerHTML = '';
-            data.forEach((rowData, i) => {
-                const tr = document.createElement('tr');
-                const idx = i + 1;
-                if(tab === 'remate'){
-                    tr.innerHTML = `
-                        <td>${idx}</td>
-                        <td><input type="text" placeholder="Nombre completo" value="${rowData[0] || ''}" /></td>
-                        <td><input type="tel" placeholder="Teléfono" value="${rowData[1] || ''}" /></td>
-                        <td><input type="email" placeholder="Email" value="${rowData[2] || ''}" /></td>
-                        <td><input type="number" min="0" step="any" placeholder="Valor ofrecido" value="${rowData[3] || ''}" /></td>
-                        <td>
-                            <select>
-                                <option value="pendiente" ${rowData[4]==='pendiente'?'selected':''} class="status-pendiente">Pendiente</option>
-                                <option value="pagado" ${rowData[4]==='pagado'?'selected':''} class="status-pagado">Pagado</option>
-                                <option value="cancelado" ${rowData[4]==='cancelado'?'selected':''} class="status-cancelado">Cancelado</option>
-                            </select>
-                        </td>
-                        <td><input type="date" value="${rowData[5] || ''}" /></td>
-                        <td><input type="text" placeholder="Artículo/Premio" value="${rowData[6] || ''}" /></td>
-                        <td><input type="text" placeholder="Observaciones" value="${rowData[7] || ''}" /></td>
-                    `;
-                } else {
-                    tr.innerHTML = `
-                        <td>${idx}</td>
-                        <td><input type="text" placeholder="Nombre completo" value="${rowData[0] || ''}" /></td>
-                        <td><input type="tel" placeholder="Teléfono" value="${rowData[1] || ''}" /></td>
-                        <td><input type="email" placeholder="Email" value="${rowData[2] || ''}" /></td>
-                        <td><input type="number" min="0" step="any" placeholder="Valor" value="${rowData[3] || ''}" /></td>
-                        <td>
-                            <select>
-                                <option value="pendiente" ${rowData[4]==='pendiente'?'selected':''} class="status-pendiente">Pendiente</option>
-                                <option value="pagado" ${rowData[4]==='pagado'?'selected':''} class="status-pagado">Pagado</option>
-                                <option value="cancelado" ${rowData[4]==='cancelado'?'selected':''} class="status-cancelado">Cancelado</option>
-                            </select>
-                        </td>
-                        <td><input type="date" value="${rowData[5] || ''}" /></td>
-                        <td><input type="text" placeholder="Observaciones" value="${rowData[6] || ''}" /></td>
-                    `;
-                }
-                tbody.appendChild(tr);
+        // Estado (select)
+        const estadoTd = document.createElement('td');
+        const estadoSelect = document.createElement('select');
+        estadoSelect.setAttribute('aria-label', 'Estado del pago');
+        estadoSelect.classList.add('status-pendiente');
+        ['Pendiente', 'Pagado', 'Cancelado'].forEach(status => {
+            const option = document.createElement('option');
+            option.value = status;
+            option.textContent = status;
+            estadoSelect.appendChild(option);
+        });
+        estadoSelect.value = 'Pendiente';
+        estadoSelect.addEventListener('change', () => {
+            updateEstadoStyle(estadoSelect);
+        });
+        estadoTd.appendChild(estadoSelect);
 
-                const select = tr.querySelector('select');
-                if(select) updateStatusClass(select);
+        // Fecha Pago
+        const fechaTd = document.createElement('td');
+        const fechaInput = document.createElement('input');
+        fechaInput.type = 'date';
+        fechaInput.setAttribute('aria-label', 'Fecha de pago');
+        fechaTd.appendChild(fechaInput);
+
+        // Observaciones
+        const obsTd = document.createElement('td');
+        const obsInput = document.createElement('input');
+        obsInput.type = 'text';
+        obsInput.placeholder = 'Observaciones';
+        obsInput.setAttribute('aria-label', 'Observaciones');
+        obsTd.appendChild(obsInput);
+
+        // Índice (número)
+        const indexTd = document.createElement('td');
+        indexTd.textContent = index;
+
+        // Orden correcto: número, nombre, teléfono, email, valor, estado, fecha, observaciones
+        row.appendChild(indexTd);
+        row.appendChild(nameTd);
+        row.appendChild(phoneTd);
+        row.appendChild(emailTd);
+        row.appendChild(valorTd);
+        row.appendChild(estadoTd);
+        row.appendChild(fechaTd);
+        row.appendChild(obsTd);
+
+        tableBody.appendChild(row);
+
+        updateAllSummaries();
+    }
+
+    // Actualiza el color del select según estado
+    function updateEstadoStyle(select) {
+        select.classList.remove('status-pendiente', 'status-pagado', 'status-cancelado');
+        const val = select.value.toLowerCase();
+        if(val === 'pendiente') select.classList.add('status-pendiente');
+        else if(val === 'pagado') select.classList.add('status-pagado');
+        else if(val === 'cancelado') select.classList.add('status-cancelado');
+    }
+
+    // Extrae datos de una tabla a array de objetos
+    function extractTableData(tab) {
+        const rows = document.querySelectorAll(`#table-${tab} tbody tr`);
+        const arr = [];
+        rows.forEach((tr, i) => {
+            const cells = tr.querySelectorAll('td');
+            // celdas: 0 index, 1 nombre, 2 teléfono, 3 email, 4 valor, 5 estado, 6 fecha, 7 observaciones
+            arr.push({
+                nombre: cells[1].querySelector('input').value.trim(),
+                telefono: cells[2].querySelector('input').value.trim(),
+                email: cells[3].querySelector('input').value.trim(),
+                valor: parseFloat(cells[4].querySelector('input').value) || 0,
+                estado: cells[5].querySelector('select').value,
+                fecha: cells[6].querySelector('input').value,
+                observaciones: cells[7].querySelector('input').value.trim()
             });
-            updateResumen(tab);
-        }
+        });
+        return arr;
+    }
 
-        // Evento al cambiar inputs o selects: actualiza resumen y guarda
-        function onInputChange(e){
-            const target = e.target;
-            const tr = target.closest('tr');
-            const tbody = target.closest('tbody');
-            if(!tbody || !tr) return;
-            const tableId = tbody.closest('table').id;
-            const tab = tableId.replace('table-', '');
-            if(target.tagName === 'SELECT'){
-                updateStatusClass(target);
+    // Carga datos a la tabla desde un array de objetos
+    function loadTableData(tab, arr) {
+        const tbody = document.querySelector(`#table-${tab} tbody`);
+        tbody.innerHTML = '';
+        arr.forEach((item, i) => {
+            const row = document.createElement('tr');
+
+            // Índice
+            const indexTd = document.createElement('td');
+            indexTd.textContent = i + 1;
+
+            // Nombre completo
+            const nameTd = document.createElement('td');
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = item.nombre || '';
+            nameInput.setAttribute('aria-label', 'Nombre completo');
+            nameTd.appendChild(nameInput);
+
+            // Teléfono
+            const phoneTd = document.createElement('td');
+            const phoneInput = document.createElement('input');
+            phoneInput.type = 'tel';
+            phoneInput.value = item.telefono || '';
+            phoneInput.setAttribute('aria-label', 'Teléfono');
+            phoneTd.appendChild(phoneInput);
+
+            // Email
+            const emailTd = document.createElement('td');
+            const emailInput = document.createElement('input');
+            emailInput.type = 'email';
+            emailInput.value = item.email || '';
+            emailInput.setAttribute('aria-label', 'Correo electrónico');
+            emailTd.appendChild(emailInput);
+
+            // Valor
+            const valorTd = document.createElement('td');
+            const valorInput = document.createElement('input');
+            valorInput.type = 'number';
+            valorInput.min = '0';
+            valorInput.value = item.valor || 0;
+            valorInput.setAttribute('aria-label', 'Valor pagado');
+            valorTd.appendChild(valorInput);
+
+            // Estado
+            const estadoTd = document.createElement('td');
+            const estadoSelect = document.createElement('select');
+            estadoSelect.setAttribute('aria-label', 'Estado del pago');
+            ['Pendiente', 'Pagado', 'Cancelado'].forEach(status => {
+                const option = document.createElement('option');
+                option.value = status;
+                option.textContent = status;
+                estadoSelect.appendChild(option);
+            });
+            estadoSelect.value = item.estado || 'Pendiente';
+            updateEstadoStyle(estadoSelect);
+            estadoSelect.addEventListener('change', () => {
+                updateEstadoStyle(estadoSelect);
+                updateAllSummaries();
+            });
+            estadoTd.appendChild(estadoSelect);
+
+            // Fecha pago
+            const fechaTd = document.createElement('td');
+            const fechaInput = document.createElement('input');
+            fechaInput.type = 'date';
+            fechaInput.value = item.fecha || '';
+            fechaInput.setAttribute('aria-label', 'Fecha de pago');
+            fechaTd.appendChild(fechaInput);
+
+            // Observaciones
+            const obsTd = document.createElement('td');
+            const obsInput = document.createElement('input');
+            obsInput.type = 'text';
+            obsInput.value = item.observaciones || '';
+            obsInput.placeholder = 'Observaciones';
+            obsInput.setAttribute('aria-label', 'Observaciones');
+            obsTd.appendChild(obsInput);
+
+            // Añadir celdas al fila (en orden)
+            row.appendChild(indexTd);
+            row.appendChild(nameTd);
+            row.appendChild(phoneTd);
+            row.appendChild(emailTd);
+            row.appendChild(valorTd);
+            row.appendChild(estadoTd);
+            row.appendChild(fechaTd);
+            row.appendChild(obsTd);
+
+            tbody.appendChild(row);
+        });
+    }
+
+    // Actualizar los resúmenes de todas las pestañas
+    function updateAllSummaries() {
+        ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(tab => {
+            const arr = extractTableData(tab);
+            data[tab] = arr; // Actualizar estado
+            updateSummary(tab, arr);
+        });
+    }
+
+    // Actualizar resumen individual
+    function updateSummary(tab, arr) {
+        const total = arr.length;
+        const pagados = arr.filter(x => x.estado.toLowerCase() === 'pagado').length;
+        const pendientes = arr.filter(x => x.estado.toLowerCase() === 'pendiente').length;
+        const ingresos = arr.reduce((acc, cur) => {
+            if(cur.estado.toLowerCase() === 'pagado') return acc + (cur.valor || 0);
+            return acc;
+        }, 0);
+
+        document.getElementById(`total-${tab}`).textContent = total;
+        document.getElementById(`pagados-${tab}`).textContent = pagados;
+        document.getElementById(`pendientes-${tab}`).textContent = pendientes;
+        document.getElementById(`ingresos-${tab}`).textContent = `$${ingresos.toLocaleString('es-CO')}`;
+    }
+
+    // Guardar datos en Google Sheets (Apps Script)
+    async function saveData() {
+        // Extraer datos actualizados para enviar
+        updateAllSummaries();
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
             }
-            updateResumen(tab);
-            saveData(tab);
-        }
-
-        // Agrega una fila nueva a la tabla indicada
-        function addRow(tab) {
-            const tbody = document.querySelector(`#table-${tab} tbody`);
-            const rowCount = tbody.rows.length + 1;
-            const tr = document.createElement('tr');
-            if(tab === 'remate'){
-                tr.innerHTML = `
-                    <td>${rowCount}</td>
-                    <td><input type="text" placeholder="Nombre completo" /></td>
-                    <td><input type="tel" placeholder="Teléfono" /></td>
-                    <td><input type="email" placeholder="Email" /></td>
-                    <td><input type="number" min="0" step="any" placeholder="Valor ofrecido" /></td>
-                    <td>
-                        <select>
-                            <option value="pendiente" class="status-pendiente">Pendiente</option>
-                            <option value="pagado" class="status-pagado">Pagado</option>
-                            <option value="cancelado" class="status-cancelado">Cancelado</option>
-                        </select>
-                    </td>
-                    <td><input type="date" /></td>
-                    <td><input type="text" placeholder="Artículo/Premio" /></td>
-                    <td><input type="text" placeholder="Observaciones" /></td>
-                `;
+            const result = await response.json();
+            if(result.status === 'success'){
+                alert('✅ Datos guardados correctamente en la nube.');
             } else {
-                tr.innerHTML = `
-                    <td>${rowCount}</td>
-                    <td><input type="text" placeholder="Nombre completo" /></td>
-                    <td><input type="tel" placeholder="Teléfono" /></td>
-                    <td><input type="email" placeholder="Email" /></td>
-                    <td><input type="number" min="0" step="any" placeholder="Valor" /></td>
-                    <td>
-                        <select>
-                            <option value="pendiente" class="status-pendiente">Pendiente</option>
-                            <option value="pagado" class="status-pagado">Pagado</option>
-                            <option value="cancelado" class="status-cancelado">Cancelado</option>
-                        </select>
-                    </td>
-                    <td><input type="date" /></td>
-                    <td><input type="text" placeholder="Observaciones" /></td>
-                `;
+                alert('❌ Error al guardar: ' + (result.message || ''));
             }
-            tbody.appendChild(tr);
-            tr.querySelectorAll('input, select').forEach(input => {
-                input.addEventListener('input', onInputChange);
-                if(input.tagName === 'SELECT'){
-                    input.addEventListener('change', onInputChange);
-                    updateStatusClass(input);
-                }
-            });
-            updateResumen(tab);
-            saveData(tab);
+        } catch (error) {
+            alert('❌ Error de conexión o servidor: ' + error.message);
         }
+    }
 
-        // Exportar tabla visible a CSV
-        function exportToCSV(filename, tab) {
-            const tbody = document.querySelector(`#table-${tab} tbody`);
-            const rows = tbody.rows;
-            if(rows.length === 0){
-                alert("No hay datos para exportar en esta pestaña.");
-                return;
-            }
-            // Headers
-            const headers = [];
-            document.querySelectorAll(`#table-${tab} thead th`).forEach(th => {
-                headers.push(th.textContent.trim());
-            });
-            const csvRows = [];
-            csvRows.push(headers.join(','));
+    // Descargar datos a Excel
+    function exportToExcel() {
+        updateAllSummaries();
 
-            for(let row of rows){
-                const rowData = [];
-                for(let cell of row.cells){
-                    if(cell.cellIndex === 0) continue; // Omitir índice si quieres
-                    const input = cell.querySelector('input, select');
-                    if(input){
-                        let val = input.value.replace(/"/g, '""');
-                        if(val.includes(',') || val.includes('"')){
-                            val = `"${val}"`;
-                        }
-                        rowData.push(val);
-                    } else {
-                        let val = cell.textContent.trim().replace(/"/g, '""');
-                        if(val.includes(',') || val.includes('"')){
-                            val = `"${val}"`;
-                        }
-                        rowData.push(val);
-                    }
-                }
-                csvRows.push(rowData.join(','));
-            }
+        let htmlTable = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="UTF-8"></head><body>`;
 
-            const csvString = csvRows.join('\r\n');
-            const blob = new Blob([csvString], {type: 'text/csv;charset=utf-8;'});
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-        }
-
-        // Al cargar la página carga datos y agrega eventos
-        window.addEventListener('load', () => {
-            ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(tab => {
-                loadData(tab);
-                document.querySelectorAll(`#table-${tab} tbody input, #table-${tab} tbody select`).forEach(input => {
-                    input.addEventListener('input', onInputChange);
-                    if(input.tagName === 'SELECT'){
-                        input.addEventListener('change', onInputChange);
-                        updateStatusClass(input);
-                    }
-                });
-            });
+        ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(tab => {
+            htmlTable += `<h2>${tab.toUpperCase()}</h2>`;
+            htmlTable += document.querySelector(`#table-${tab}`).outerHTML;
+            htmlTable += `<br/>`;
         });
 
-        // Botón Descargar CSV
-        document.getElementById('btnDownload').addEventListener('click', () => {
-            const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
-            exportToCSV(`Registro-${activeTab}.csv`, activeTab);
-        });
+        htmlTable += "</body></html>";
 
-        // Botón Limpiar datos
-        document.getElementById('btnClear').addEventListener('click', () => {
-            if(confirm('¿Seguro que quieres limpiar todos los datos? Esta acción no se puede deshacer.')){
-                ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(tab => {
-                    localStorage.removeItem(`data-${tab}`);
-                    const tbody = document.querySelector(`#table-${tab} tbody`);
-                    tbody.innerHTML = '';
-                    updateResumen(tab);
-                });
-            }
+        const blob = new Blob([htmlTable], {
+            type: "application/vnd.ms-excel;charset=utf-8"
         });
-    </script>
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `RegistroPagos_Evento_${new Date().toISOString().slice(0,10)}.xls`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Eventos
+    document.getElementById('saveBtn').addEventListener('click', saveData);
+    document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+
+    // Actualiza resumen cuando cambian inputs o selects
+    function bindTableEvents(tab) {
+        const tbody = document.querySelector(`#table-${tab} tbody`);
+        tbody.addEventListener('input', () => updateAllSummaries());
+        tbody.addEventListener('change', () => updateAllSummaries());
+    }
+    ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(tab => {
+        bindTableEvents(tab);
+    });
+
+    // Inicialización al cargar página: cargar datos (vacío)
+    function initialize() {
+        ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(tab => {
+            loadTableData(tab, []);
+        });
+        updateAllSummaries();
+    }
+    initialize();
+
+</script>
 </body>
 </html>
