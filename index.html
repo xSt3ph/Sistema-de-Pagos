@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Pagos - Evento</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 3px solid #e9ecef;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .tab:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+        
+        .tab.active {
+            background: white;
+            color: #2c3e50;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .table-header h2 {
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: 400;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: block;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s ease;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+        }
+        
+        .status-pagado {
+            background: #d4edda !important;
+            border-color: #c3e6cb;
+        }
+        
+        .status-pendiente {
+            background: #fff3cd !important;
+            border-color: #ffeaa7;
+        }
+        
+        .status-cancelado {
+            background: #f8d7da !important;
+            border-color: #f5c6cb;
+        }
+        
+        .download-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .summary-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .summary-item h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .summary-item p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        .add-row-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 15px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .add-row-btn:hover {
+            background: #218838;
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                padding: 15px;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Registro de Pagos del Evento</h1>
+            <p>Sistema de control de pagos para chivas y remate</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('chiva1')">🚌 Chiva 1</button>
+            <button class="tab" onclick="showTab('chiva2')">🚌 Chiva 2</button>
+            <button class="tab" onclick="showTab('chiva3')">🚌 Chiva 3</button>
+            <button class="tab" onclick="showTab('remate')">🏆 Remate</button>
+        </div>
+        
+        <div class="tab-content active" id="chiva1">
+            <div class="summary-card">
+                <h2>📊 Resumen Chiva 1</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <h3 id="total-chiva1">0</h3>
+                        <p>Total Personas</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="pagados-chiva1">0</h3>
+                        <p>Pagados</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="pendientes-chiva1">0</h3>
+                        <p>Pendientes</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="ingresos-chiva1">$0</h3>
+                        <p>Ingresos</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="table-chiva1">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre Completo</th>
+                            <th>Teléfono</th>
+                            <th>Email</th>
+                            <th>Valor</th>
+                            <th>Estado</th>
+                            <th>Fecha Pago</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Filas generadas dinámicamente -->
+                    </tbody>
+                </table>
+                <button class="add-row-btn" onclick="addRow('chiva1')">➕ Agregar Persona</button>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="chiva2">
+            <div class="summary-card">
+                <h2>📊 Resumen Chiva 2</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <h3 id="total-chiva2">0</h3>
+                        <p>Total Personas</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="pagados-chiva2">0</h3>
+                        <p>Pagados</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="pendientes-chiva2">0</h3>
+                        <p>Pendientes</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="ingresos-chiva2">$0</h3>
+                        <p>Ingresos</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="table-chiva2">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre Completo</th>
+                            <th>Teléfono</th>
+                            <th>Email</th>
+                            <th>Valor</th>
+                            <th>Estado</th>
+                            <th>Fecha Pago</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Filas generadas dinámicamente -->
+                    </tbody>
+                </table>
+                <button class="add-row-btn" onclick="addRow('chiva2')">➕ Agregar Persona</button>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="chiva3">
+            <div class="summary-card">
+                <h2>📊 Resumen Chiva 3</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <h3 id="total-chiva3">0</h3>
+                        <p>Total Personas</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="pagados-chiva3">0</h3>
+                        <p>Pagados</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="pendientes-chiva3">0</h3>
+                        <p>Pendientes</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="ingresos-chiva3">$0</h3>
+                        <p>Ingresos</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="table-chiva3">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre Completo</th>
+                            <th>Teléfono</th>
+                            <th>Email</th>
+                            <th>Valor</th>
+                            <th>Estado</th>
+                            <th>Fecha Pago</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Filas generadas dinámicamente -->
+                    </tbody>
+                </table>
+                <button class="add-row-btn" onclick="addRow('chiva3')">➕ Agregar Persona</button>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="remate">
+            <div class="summary-card">
+                <h2>🏆 Resumen Remate</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <h3 id="total-remate">0</h3>
+                        <p>Total Participantes</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="pagados-remate">0</h3>
+                        <p>Pagados</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="pendientes-remate">0</h3>
+                        <p>Pendientes</p>
+                    </div>
+                    <div class="summary-item">
+                        <h3 id="ingresos-remate">$0</h3>
+                        <p>Ingresos</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="table-remate">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre Completo</th>
+                            <th>Teléfono</th>
+                            <th>Email</th>
+                            <th>Valor Ofrecido</th>
+                            <th>Estado</th>
+                            <th>Fecha Pago</th>
+                            <th>Artículo/Premio</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Filas generadas dinámicamente -->
+                    </tbody>
+                </table>
+                <button class="add-row-btn" onclick="addRow('remate')">➕ Agregar Participante</button>
+            </div>
+        </div>
+    </div>
+    
+    <button class="download-btn" onclick="exportToExcel()">📥 Descargar Excel</button>
+    
+    <!-- Botón adicional para limpiar datos -->
+    <button class="download-btn" onclick="clearAllData()" style="bottom: 90px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+        🗑️ Limpiar Todo
+    </button>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Datos del evento con autoguardado
+        let eventData = {
+            chiva1: [],
+            chiva2: [],
+            chiva3: [],
+            remate: []
+        };
+        
+        // Cargar datos guardados al iniciar
+        function loadSavedData() {
+            const saved = JSON.parse(sessionStorage.getItem('eventData') || '{}');
+            if (Object.keys(saved).length > 0) {
+                eventData = { ...eventData, ...saved };
+                console.log('Datos cargados:', eventData);
+                return true;
+            }
+            return false;
+        }
+        
+        // Guardar datos automáticamente
+        function saveData() {
+            sessionStorage.setItem('eventData', JSON.stringify(eventData));
+            console.log('Datos guardados automáticamente');
+        }
+        
+        // Inicializar con algunas filas vacías o cargar datos guardados
+        function initializeTables() {
+            const hasData = loadSavedData();
+            
+            ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(function(table) {
+                if (hasData && eventData[table] && eventData[table].length > 0) {
+                    // Cargar datos existentes
+                    loadTableData(table);
+                } else {
+                    // Crear filas vacías si no hay datos guardados
+                    for(let i = 0; i < 20; i++) {
+                        addRow(table, true);
+                    }
+                }
+            });
+        }
+        
+        // Cargar datos existentes en la tabla
+        function loadTableData(tableName) {
+            const tableBody = document.querySelector(`#table-${tableName} tbody`);
+            tableBody.innerHTML = ''; // Limpiar tabla
+            
+            const data = eventData[tableName];
+            for (let i = 0; i < Math.max(data.length, 20); i++) {
+                addRowWithData(tableName, i, data[i] || {});
+            }
+            updateSummary(tableName);
+        }
+        
+        // Cambiar pestañas
+        function showTab(tabName) {
+            // Ocultar todas las pestañas
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar la pestaña seleccionada
+            document.getElementById(tabName).classList.add('active');
+            
+            // Activar el botón de la pestaña correspondiente
+            document.querySelectorAll('.tab').forEach((tab, index) => {
+                const tabs = ['chiva1', 'chiva2', 'chiva3', 'remate'];
+                if (tabs[index] === tabName) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+        
+        // Agregar fila con datos específicos
+        function addRowWithData(tableName, index, data) {
+            const tableBody = document.querySelector(`#table-${tableName} tbody`);
+            const rowCount = index + 1;
+            
+            const row = document.createElement('tr');
+            
+            if (tableName === 'remate') {
+                row.innerHTML = `
+                    <td>${rowCount}</td>
+                    <td><input type="text" placeholder="Nombre completo" value="${data.nombre || ''}" onchange="updateData('${tableName}', ${index}, 'nombre', this.value)"></td>
+                    <td><input type="tel" placeholder="Teléfono" value="${data.telefono || ''}" onchange="updateData('${tableName}', ${index}, 'telefono', this.value)"></td>
+                    <td><input type="email" placeholder="Email" value="${data.email || ''}" onchange="updateData('${tableName}', ${index}, 'email', this.value)"></td>
+                    <td><input type="number" placeholder="0" value="${data.valor || ''}" onchange="updateData('${tableName}', ${index}, 'valor', this.value); updateSummary('${tableName}')"></td>
+                    <td>
+                        <select onchange="updateData('${tableName}', ${index}, 'estado', this.value); updateSummary('${tableName}'); updateRowStyle(this)">
+                            <option value="pendiente" ${data.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="pagado" ${data.estado === 'pagado' ? 'selected' : ''}>Pagado</option>
+                            <option value="cancelado" ${data.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+                        </select>
+                    </td>
+                    <td><input type="date" value="${data.fecha || ''}" onchange="updateData('${tableName}', ${index}, 'fecha', this.value)"></td>
+                    <td><input type="text" placeholder="Artículo o premio" value="${data.articulo || ''}" onchange="updateData('${tableName}', ${index}, 'articulo', this.value)"></td>
+                    <td><input type="text" placeholder="Observaciones" value="${data.observaciones || ''}" onchange="updateData('${tableName}', ${index}, 'observaciones', this.value)"></td>
+                `;
+            } else {
+                row.innerHTML = `
+                    <td>${rowCount}</td>
+                    <td><input type="text" placeholder="Nombre completo" value="${data.nombre || ''}" onchange="updateData('${tableName}', ${index}, 'nombre', this.value)"></td>
+                    <td><input type="tel" placeholder="Teléfono" value="${data.telefono || ''}" onchange="updateData('${tableName}', ${index}, 'telefono', this.value)"></td>
+                    <td><input type="email" placeholder="Email" value="${data.email || ''}" onchange="updateData('${tableName}', ${index}, 'email', this.value)"></td>
+                    <td><input type="number" placeholder="0" value="${data.valor || ''}" onchange="updateData('${tableName}', ${index}, 'valor', this.value); updateSummary('${tableName}')"></td>
+                    <td>
+                        <select onchange="updateData('${tableName}', ${index}, 'estado', this.value); updateSummary('${tableName}'); updateRowStyle(this)">
+                            <option value="pendiente" ${data.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="pagado" ${data.estado === 'pagado' ? 'selected' : ''}>Pagado</option>
+                            <option value="cancelado" ${data.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+                        </select>
+                    </td>
+                    <td><input type="date" value="${data.fecha || ''}" onchange="updateData('${tableName}', ${index}, 'fecha', this.value)"></td>
+                    <td><input type="text" placeholder="Observaciones" value="${data.observaciones || ''}" onchange="updateData('${tableName}', ${index}, 'observaciones', this.value)"></td>
+                `;
+            }
+            
+            tableBody.appendChild(row);
+            
+            // Aplicar estilo según el estado
+            if (data.estado) {
+                const select = row.querySelector('select');
+                updateRowStyle(select);
+            }
+            
+            // Inicializar datos si no existen
+            if (!eventData[tableName][index]) {
+                eventData[tableName][index] = {
+                    nombre: data.nombre || '',
+                    telefono: data.telefono || '',
+                    email: data.email || '',
+                    valor: data.valor || 0,
+                    estado: data.estado || 'pendiente',
+                    fecha: data.fecha || '',
+                    observaciones: data.observaciones || '',
+                    ...(tableName === 'remate' && { articulo: data.articulo || '' })
+                };
+            }
+        }
+            const tableBody = document.querySelector(`#table-${tableName} tbody`);
+            const rowCount = tableBody.children.length + 1;
+            
+        // Agregar fila vacía
+        function addRow(tableName, initial = false) {
+            const tableBody = document.querySelector(`#table-${tableName} tbody`);
+            const rowCount = tableBody.children.length + 1;
+            
+            addRowWithData(tableName, rowCount - 1, {});
+            
+            if (!initial) {
+                updateSummary(tableName);
+                saveData(); // Guardar cuando se agrega una nueva fila
+            }
+        }
+        
+        // Actualizar datos y guardar automáticamente
+        function updateData(tableName, index, field, value) {
+            if (!eventData[tableName][index]) {
+                eventData[tableName][index] = {};
+            }
+            eventData[tableName][index][field] = value;
+            
+            // Guardar automáticamente cada vez que se actualiza un dato
+            saveData();
+        }
+        
+        // Actualizar estilo de fila según estado
+        function updateRowStyle(selectElement) {
+            const row = selectElement.closest('tr');
+            row.className = ''; // Limpiar clases
+            
+            if (selectElement.value === 'pagado') {
+                row.classList.add('status-pagado');
+            } else if (selectElement.value === 'pendiente') {
+                row.classList.add('status-pendiente');
+            } else if (selectElement.value === 'cancelado') {
+                row.classList.add('status-cancelado');
+            }
+        }
+        
+        // Actualizar resumen con autoguardado
+        function updateSummary(tableName) {
+            const data = eventData[tableName].filter(item => item && item.nombre);
+            const total = data.length;
+            const pagados = data.filter(item => item.estado === 'pagado').length;
+            const pendientes = data.filter(item => item.estado === 'pendiente').length;
+            const ingresos = data.filter(item => item.estado === 'pagado')
+                                .reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+            
+            document.getElementById(`total-${tableName}`).textContent = total;
+            document.getElementById(`pagados-${tableName}`).textContent = pagados;
+            document.getElementById(`pendientes-${tableName}`).textContent = pendientes;
+            document.getElementById(`ingresos-${tableName}`).textContent = `${ingresos.toLocaleString()}`;
+            
+            // Guardar datos después de actualizar resumen
+            saveData();
+        }
+        
+        // Exportar a Excel
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+            
+            // Crear hojas para cada tabla
+            ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(function(tableName) {
+                const data = eventData[tableName].filter(function(item) { 
+                    return item && (item.nombre || item.telefono || item.email); 
+                });
+                
+                let headers, wsData;
+                
+                if (tableName === 'remate') {
+                    headers = ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor Ofrecido', 'Estado', 'Fecha Pago', 'Artículo/Premio', 'Observaciones'];
+                    wsData = data.map(function(item, index) {
+                        return [
+                            index + 1,
+                            item.nombre || '',
+                            item.telefono || '',
+                            item.email || '',
+                            item.valor || 0,
+                            item.estado || 'pendiente',
+                            item.fecha || '',
+                            item.articulo || '',
+                            item.observaciones || ''
+                        ];
+                    });
+                } else {
+                    headers = ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones'];
+                    wsData = data.map(function(item, index) {
+                        return [
+                            index + 1,
+                            item.nombre || '',
+                            item.telefono || '',
+                            item.email || '',
+                            item.valor || 0,
+                            item.estado || 'pendiente',
+                            item.fecha || '',
+                            item.observaciones || ''
+                        ];
+                    });
+                }
+                
+                const finalData = [headers, ...wsData];
+                const ws = XLSX.utils.aoa_to_sheet(finalData);
+                
+                // Establecer ancho de columnas
+                const colWidths = headers.map(function() { return { wch: 15 }; });
+                ws['!cols'] = colWidths;
+                
+                // Agregar la hoja al libro
+                const sheetName = tableName === 'remate' ? 'Remate' : 'Chiva ' + tableName.slice(-1);
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            });
+            
+            // Descargar el archivo
+            const fileName = 'Registro_Pagos_Evento_' + new Date().toISOString().split('T')[0] + '.xlsx';
+            XLSX.writeFile(wb, fileName);
+        }
+        
+        // Limpiar todos los datos
+        function clearAllData() {
+            if (confirm('¿Estás seguro de que quieres borrar todos los datos? Esta acción no se puede deshacer.')) {
+                // Limpiar datos
+                eventData = {
+                    chiva1: [],
+                    chiva2: [],
+                    chiva3: [],
+                    remate: []
+                };
+                
+                // Limpiar almacenamiento
+                sessionStorage.removeItem('eventData');
+                
+                // Reinicializar tablas
+                initializeTables();
+                
+                // Actualizar resúmenes
+                ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(function(tableName) {
+                    updateSummary(tableName);
+                });
+                
+                alert('¡Todos los datos han sido eliminados!');
+            }
+        }
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTables();
+            
+            // Actualizar resúmenes iniciales
+            ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(function(tableName) {
+                updateSummary(tableName);
+            });
+        });
+    </script>
+</body>
+</html>
