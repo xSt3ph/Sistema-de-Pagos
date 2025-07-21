@@ -125,6 +125,7 @@
             border-bottom: 2px solid #e9ecef;
             position: sticky;
             top: 0;
+            z-index: 2;
         }
         td {
             padding: 12px 15px;
@@ -167,6 +168,7 @@
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
+            z-index: 999;
         }
         .download-btn:hover {
             transform: translateY(-3px);
@@ -248,10 +250,10 @@
         </div>
         
         <div class="tabs">
-            <button class="tab active" onclick="showTab('chiva1')">🚌 Chiva 1</button>
-            <button class="tab" onclick="showTab('chiva2')">🚌 Chiva 2</button>
-            <button class="tab" onclick="showTab('chiva3')">🚌 Chiva 3</button>
-            <button class="tab" onclick="showTab('remate')">🏆 Remate</button>
+            <button class="tab active" data-tab="chiva1">🚌 Chiva 1</button>
+            <button class="tab" data-tab="chiva2">🚌 Chiva 2</button>
+            <button class="tab" data-tab="chiva3">🚌 Chiva 3</button>
+            <button class="tab" data-tab="remate">🏆 Remate</button>
         </div>
         
         <div class="tab-content active" id="chiva1">
@@ -445,289 +447,221 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // Datos del evento con autoguardado
         let eventData = {
             chiva1: [],
             chiva2: [],
             chiva3: [],
             remate: []
         };
-        
-        // Cargar datos guardados al iniciar (ahora con localStorage)
+
+        // Cargar datos guardados al iniciar (localStorage)
         function loadSavedData() {
             const savedRaw = localStorage.getItem('eventData');
             if (savedRaw) {
-                const saved = JSON.parse(savedRaw);
-                eventData = { ...eventData, ...saved };
-                console.log('Datos cargados:', eventData);
-                return true;
+                try {
+                    const saved = JSON.parse(savedRaw);
+                    eventData = { ...eventData, ...saved };
+                    return true;
+                } catch {
+                    console.warn("Error al parsear los datos guardados");
+                    return false;
+                }
             }
             return false;
         }
-        
-        // Guardar datos automáticamente (ahora con localStorage)
+
+        // Guardar datos en localStorage
         function saveData() {
             localStorage.setItem('eventData', JSON.stringify(eventData));
-            console.log('Datos guardados automáticamente');
         }
-        
-        // Inicializar con algunas filas vacías o cargar datos guardados
+
+        // Inicializar tablas con datos o filas vacías
         function initializeTables() {
             const hasData = loadSavedData();
-            
-            ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(function(table) {
+            ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(table => {
                 if (hasData && eventData[table] && eventData[table].length > 0) {
-                    // Cargar datos existentes
                     loadTableData(table);
                 } else {
-                    // Crear filas vacías si no hay datos guardados
-                    for(let i = 0; i < 20; i++) {
+                    eventData[table] = [];
+                    for (let i = 0; i < 20; i++) {
                         addRow(table, true);
                     }
                 }
             });
         }
-        
-        // Cargar datos existentes en la tabla
+
+        // Cargar datos en tabla
         function loadTableData(tableName) {
-            const tableBody = document.querySelector(`#table-${tableName} tbody`);
-            tableBody.innerHTML = ''; // Limpiar tabla
-            
+            const tbody = document.querySelector(`#table-${tableName} tbody`);
+            tbody.innerHTML = '';
             const data = eventData[tableName];
             for (let i = 0; i < Math.max(data.length, 20); i++) {
                 addRowWithData(tableName, i, data[i] || {});
             }
             updateSummary(tableName);
         }
-        
-        // Cambiar pestañas
+
+        // Mostrar pestaña seleccionada
         function showTab(tabName) {
-            // Ocultar todas las pestañas
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
+            document.querySelectorAll('.tab-content').forEach(tc => {
+                tc.classList.toggle('active', tc.id === tabName);
             });
             document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
             });
-            
-            // Mostrar la pestaña seleccionada
-            document.getElementById(tabName).classList.add('active');
-            
-            // Activar el botón de la pestaña correspondiente
-            document.querySelectorAll('.tab').forEach((tab, index) => {
-                if (tab.textContent.toLowerCase().includes(tabName)) {
-                    tab.classList.add('active');
-                }
-            });
-            
-            // Actualizar resumen al cambiar de pestaña
             updateSummary(tabName);
         }
-        
-        // Agregar fila vacía (por botón)
+
+        // Asignar evento click a pestañas
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                showTab(tab.dataset.tab);
+            });
+        });
+
+        // Añadir fila vacía
         function addRow(tableName, silent = false) {
-            const tableBody = document.querySelector(`#table-${tableName} tbody`);
-            const index = tableBody.rows.length;
-            
-            // Añadir objeto vacío en eventData para esa fila
             if (!eventData[tableName]) eventData[tableName] = [];
-            eventData[tableName].push({
-                nombre: '',
-                telefono: '',
-                email: '',
-                valor: '',
-                estado: 'Pendiente',
-                fecha: '',
-                observaciones: '',
-                articulo: '' // Solo para remate
-            });
-            
-            addRowWithData(tableName, index, eventData[tableName][index]);
-            
-            if (!silent) saveData();
+            eventData[tableName].push({});
+            if (!silent) loadTableData(tableName);
+            else addRowWithData(tableName, eventData[tableName].length - 1, {});
         }
-        
-        // Agregar fila con datos (llenar inputs)
-        function addRowWithData(tableName, index, rowData) {
-            const tableBody = document.querySelector(`#table-${tableName} tbody`);
-            
+
+        // Añadir fila con datos (obj)
+        function addRowWithData(tableName, index, data) {
+            const tbody = document.querySelector(`#table-${tableName} tbody`);
             const tr = document.createElement('tr');
-            
-            // Número fila
-            const tdNum = document.createElement('td');
-            tdNum.textContent = index + 1;
-            tr.appendChild(tdNum);
-            
-            // Nombre Completo
-            const tdNombre = document.createElement('td');
-            const inputNombre = document.createElement('input');
-            inputNombre.type = 'text';
-            inputNombre.value = rowData.nombre || '';
-            inputNombre.placeholder = 'Nombre completo';
-            inputNombre.oninput = () => updateData(tableName, index, 'nombre', inputNombre.value);
-            tdNombre.appendChild(inputNombre);
-            tr.appendChild(tdNombre);
-            
-            // Teléfono
-            const tdTelefono = document.createElement('td');
-            const inputTelefono = document.createElement('input');
-            inputTelefono.type = 'tel';
-            inputTelefono.value = rowData.telefono || '';
-            inputTelefono.placeholder = 'Teléfono';
-            inputTelefono.oninput = () => updateData(tableName, index, 'telefono', inputTelefono.value);
-            tdTelefono.appendChild(inputTelefono);
-            tr.appendChild(tdTelefono);
-            
-            // Email
-            const tdEmail = document.createElement('td');
-            const inputEmail = document.createElement('input');
-            inputEmail.type = 'email';
-            inputEmail.value = rowData.email || '';
-            inputEmail.placeholder = 'Email';
-            inputEmail.oninput = () => updateData(tableName, index, 'email', inputEmail.value);
-            tdEmail.appendChild(inputEmail);
-            tr.appendChild(tdEmail);
-            
-            // Valor / Valor Ofrecido
-            const tdValor = document.createElement('td');
-            const inputValor = document.createElement('input');
-            inputValor.type = 'number';
-            inputValor.min = 0;
-            inputValor.value = rowData.valor || '';
-            inputValor.placeholder = 'Valor';
-            inputValor.oninput = () => updateData(tableName, index, 'valor', inputValor.value);
-            tdValor.appendChild(inputValor);
-            tr.appendChild(tdValor);
-            
-            // Estado (select)
-            const tdEstado = document.createElement('td');
-            const selectEstado = document.createElement('select');
-            selectEstado.className = 'status-select';
-            ['Pendiente', 'Pagado', 'Cancelado'].forEach(status => {
-                const option = document.createElement('option');
-                option.value = status;
-                option.textContent = status;
-                selectEstado.appendChild(option);
+            // Número (índice+1)
+            const tdIndex = document.createElement('td');
+            tdIndex.textContent = index + 1;
+            tr.appendChild(tdIndex);
+
+            // Campos dependiendo tabla
+            const fields = {
+                chiva1: ['nombre', 'telefono', 'email', 'valor', 'estado', 'fechaPago', 'observaciones'],
+                chiva2: ['nombre', 'telefono', 'email', 'valor', 'estado', 'fechaPago', 'observaciones'],
+                chiva3: ['nombre', 'telefono', 'email', 'valor', 'estado', 'fechaPago', 'observaciones'],
+                remate: ['nombre', 'telefono', 'email', 'valor', 'estado', 'fechaPago', 'articulo', 'observaciones']
+            };
+
+            const keys = fields[tableName];
+
+            keys.forEach(key => {
+                const td = document.createElement('td');
+                if (key === 'estado') {
+                    const select = document.createElement('select');
+                    select.classList.add('status-select');
+                    ['Pendiente', 'Pagado', 'Cancelado'].forEach(opt => {
+                        const option = document.createElement('option');
+                        option.value = opt;
+                        option.textContent = opt;
+                        select.appendChild(option);
+                    });
+                    select.value = data[key] || 'Pendiente';
+                    // Colores según estado
+                    function updateColor() {
+                        select.classList.remove('status-pagado', 'status-pendiente', 'status-cancelado');
+                        if (select.value === 'Pagado') select.classList.add('status-pagado');
+                        else if (select.value === 'Pendiente') select.classList.add('status-pendiente');
+                        else if (select.value === 'Cancelado') select.classList.add('status-cancelado');
+                    }
+                    updateColor();
+                    select.addEventListener('change', () => {
+                        eventData[tableName][index][key] = select.value;
+                        updateColor();
+                        updateSummary(tableName);
+                        saveData();
+                    });
+                    td.appendChild(select);
+                } else {
+                    const input = document.createElement('input');
+                    input.type = (key === 'valor') ? 'number' : 'text';
+                    if (key === 'fechaPago') input.type = 'date';
+                    input.value = data[key] || '';
+                    input.placeholder = key === 'articulo' ? 'Artículo / Premio' : '';
+                    input.addEventListener('input', () => {
+                        eventData[tableName][index][key] = input.value;
+                        updateSummary(tableName);
+                        saveData();
+                    });
+                    td.appendChild(input);
+                }
+                tr.appendChild(td);
             });
-            selectEstado.value = rowData.estado || 'Pendiente';
-            selectEstado.onchange = () => updateData(tableName, index, 'estado', selectEstado.value);
-            tdEstado.appendChild(selectEstado);
-            tr.appendChild(tdEstado);
-            
-            // Fecha Pago
-            const tdFecha = document.createElement('td');
-            const inputFecha = document.createElement('input');
-            inputFecha.type = 'date';
-            inputFecha.value = rowData.fecha || '';
-            inputFecha.oninput = () => updateData(tableName, index, 'fecha', inputFecha.value);
-            tdFecha.appendChild(inputFecha);
-            tr.appendChild(tdFecha);
-            
-            // Artículo / Premio (solo remate)
-            if (tableName === 'remate') {
-                const tdArticulo = document.createElement('td');
-                const inputArticulo = document.createElement('input');
-                inputArticulo.type = 'text';
-                inputArticulo.value = rowData.articulo || '';
-                inputArticulo.placeholder = 'Artículo / Premio';
-                inputArticulo.oninput = () => updateData(tableName, index, 'articulo', inputArticulo.value);
-                tdArticulo.appendChild(inputArticulo);
-                tr.appendChild(tdArticulo);
-            }
-            
-            // Observaciones
-            const tdObs = document.createElement('td');
-            const inputObs = document.createElement('input');
-            inputObs.type = 'text';
-            inputObs.value = rowData.observaciones || '';
-            inputObs.placeholder = 'Observaciones';
-            inputObs.oninput = () => updateData(tableName, index, 'observaciones', inputObs.value);
-            tdObs.appendChild(inputObs);
-            tr.appendChild(tdObs);
-            
-            tableBody.appendChild(tr);
+            tbody.appendChild(tr);
         }
-        
-        // Actualizar datos al escribir
-        function updateData(tableName, index, field, value) {
-            if (!eventData[tableName]) eventData[tableName] = [];
-            if (!eventData[tableName][index]) eventData[tableName][index] = {};
-            eventData[tableName][index][field] = value;
-            saveData();
-            updateSummary(tableName);
-        }
-        
-        // Actualizar resumen estadístico
+
+        // Actualizar resumen de una pestaña
         function updateSummary(tableName) {
-            const data = eventData[tableName] || [];
-            const total = data.filter(d => d.nombre && d.nombre.trim() !== '').length;
-            const pagados = data.filter(d => d.estado === 'Pagado').length;
-            const pendientes = data.filter(d => d.estado === 'Pendiente').length;
-            const ingresos = data.reduce((acc, d) => {
-                if (d.estado === 'Pagado' && d.valor) return acc + Number(d.valor);
-                return acc;
-            }, 0);
-            
+            const data = eventData[tableName];
+            if (!data) return;
+            const total = data.length;
+            let pagados = 0;
+            let pendientes = 0;
+            let ingresos = 0;
+
+            data.forEach(item => {
+                if (!item) return;
+                const estado = item.estado || 'Pendiente';
+                if (estado === 'Pagado') {
+                    pagados++;
+                    ingresos += Number(item.valor || 0);
+                } else if (estado === 'Pendiente') {
+                    pendientes++;
+                }
+            });
+
             document.getElementById(`total-${tableName}`).textContent = total;
             document.getElementById(`pagados-${tableName}`).textContent = pagados;
             document.getElementById(`pendientes-${tableName}`).textContent = pendientes;
-            document.getElementById(`ingresos-${tableName}`).textContent = `$${ingresos.toLocaleString('es-CO')}`;
+            document.getElementById(`ingresos-${tableName}`).textContent = '$' + ingresos.toLocaleString();
         }
-        
-        // Exportar todo a Excel
+
+        // Exportar a Excel usando SheetJS
         function exportToExcel() {
             const wb = XLSX.utils.book_new();
-            ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(section => {
-                const data = eventData[section] || [];
-                const ws_data = [];
-                if(section !== 'remate'){
-                    ws_data.push(['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones']);
-                    data.forEach((row, i) => {
-                        ws_data.push([
-                            i + 1,
-                            row.nombre || '',
-                            row.telefono || '',
-                            row.email || '',
-                            row.valor || '',
-                            row.estado || '',
-                            row.fecha || '',
-                            row.observaciones || ''
-                        ]);
-                    });
-                } else {
-                    ws_data.push(['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor Ofrecido', 'Estado', 'Fecha Pago', 'Artículo/Premio', 'Observaciones']);
-                    data.forEach((row, i) => {
-                        ws_data.push([
-                            i + 1,
-                            row.nombre || '',
-                            row.telefono || '',
-                            row.email || '',
-                            row.valor || '',
-                            row.estado || '',
-                            row.fecha || '',
-                            row.articulo || '',
-                            row.observaciones || ''
-                        ]);
-                    });
-                }
+
+            for (const tableName in eventData) {
+                const data = eventData[tableName];
+                if (!data || data.length === 0) continue;
+                const headers = {
+                    chiva1: ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones'],
+                    chiva2: ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones'],
+                    chiva3: ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones'],
+                    remate: ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor Ofrecido', 'Estado', 'Fecha Pago', 'Artículo/Premio', 'Observaciones']
+                };
+                const ws_data = [headers[tableName]];
+                data.forEach((item, i) => {
+                    if (!item) return;
+                    const row = [i + 1];
+                    if (tableName !== 'remate') {
+                        row.push(item.nombre || '', item.telefono || '', item.email || '', item.valor || '', item.estado || '', item.fechaPago || '', item.observaciones || '');
+                    } else {
+                        row.push(item.nombre || '', item.telefono || '', item.email || '', item.valor || '', item.estado || '', item.fechaPago || '', item.articulo || '', item.observaciones || '');
+                    }
+                    ws_data.push(row);
+                });
                 const ws = XLSX.utils.aoa_to_sheet(ws_data);
-                XLSX.utils.book_append_sheet(wb, ws, section.charAt(0).toUpperCase() + section.slice(1));
-            });
-            
-            XLSX.writeFile(wb, 'registro_evento.xlsx');
+                XLSX.utils.book_append_sheet(wb, ws, tableName.toUpperCase());
+            }
+            XLSX.writeFile(wb, 'RegistroPagos_Evento.xlsx');
         }
-        
-        // Limpiar todo (localStorage + tabla + eventData)
+
+        // Limpiar todos los datos (confirmar)
         function clearAllData() {
-            if(confirm('¿Estás seguro de que quieres eliminar todos los datos? Esta acción no se puede deshacer.')) {
-                localStorage.removeItem('eventData');
+            if (confirm('¿Estás seguro de limpiar todos los datos? Esta acción no se puede deshacer.')) {
                 eventData = { chiva1: [], chiva2: [], chiva3: [], remate: [] };
+                localStorage.removeItem('eventData');
                 initializeTables();
+                showTab('chiva1');
             }
         }
-        
-        // Iniciar la app
-        initializeTables();
+
+        // Inicializar todo al cargar
+        window.onload = () => {
+            initializeTables();
+            showTab('chiva1');
+        };
     </script>
 </body>
 </html>
