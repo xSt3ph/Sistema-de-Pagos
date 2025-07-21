@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Registro de Pagos - Evento</title>
     <style>
         body {
@@ -12,7 +12,6 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
-        
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -21,33 +20,28 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-        
         .header {
             background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
             padding: 30px;
             text-align: center;
         }
-        
         .header h1 {
             margin: 0;
             font-size: 2.5em;
             font-weight: 300;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        
         .header p {
             margin: 10px 0 0 0;
             opacity: 0.9;
             font-size: 1.1em;
         }
-        
         .tabs {
             display: flex;
             background: #f8f9fa;
             border-bottom: 3px solid #e9ecef;
         }
-        
         .tab {
             flex: 1;
             padding: 20px;
@@ -61,17 +55,14 @@
             transition: all 0.3s ease;
             position: relative;
         }
-        
         .tab:hover {
             background: #e9ecef;
             transform: translateY(-2px);
         }
-        
         .tab.active {
             background: white;
             color: #2c3e50;
         }
-        
         .tab.active::after {
             content: '';
             position: absolute;
@@ -81,16 +72,13 @@
             height: 3px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        
         .tab-content {
             display: none;
             padding: 30px;
         }
-        
         .tab-content.active {
             display: block;
         }
-        
         .table-container {
             background: white;
             border-radius: 10px;
@@ -98,43 +86,36 @@
             overflow: hidden;
             margin-bottom: 20px;
         }
-        
         .table-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 20px;
             text-align: center;
         }
-        
         .table-header h2 {
             margin: 0;
             font-size: 1.8em;
             font-weight: 400;
         }
-        
         .stats {
             display: flex;
             justify-content: space-around;
             margin-top: 15px;
             font-size: 0.9em;
         }
-        
         .stat {
             text-align: center;
         }
-        
         .stat-value {
             font-size: 1.5em;
             font-weight: bold;
             display: block;
         }
-        
         table {
             width: 100%;
             border-collapse: collapse;
             background: white;
         }
-        
         th {
             background: #f8f9fa;
             padding: 15px;
@@ -145,17 +126,14 @@
             position: sticky;
             top: 0;
         }
-        
         td {
             padding: 12px 15px;
             border-bottom: 1px solid #e9ecef;
             transition: background-color 0.2s ease;
         }
-        
         tr:hover {
             background: #f8f9fa;
         }
-        
         .status-select {
             width: 100%;
             padding: 8px;
@@ -163,22 +141,18 @@
             border-radius: 5px;
             background: white;
         }
-        
         .status-pagado {
             background: #d4edda !important;
             border-color: #c3e6cb;
         }
-        
         .status-pendiente {
             background: #fff3cd !important;
             border-color: #ffeaa7;
         }
-        
         .status-cancelado {
             background: #f8d7da !important;
             border-color: #f5c6cb;
         }
-        
         .download-btn {
             position: fixed;
             bottom: 30px;
@@ -194,12 +168,10 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         }
-        
         .download-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
-        
         .summary-card {
             background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
             color: white;
@@ -208,32 +180,27 @@
             margin-bottom: 20px;
             text-align: center;
         }
-        
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-top: 15px;
         }
-        
         .summary-item {
             background: rgba(255,255,255,0.2);
             padding: 15px;
             border-radius: 8px;
             backdrop-filter: blur(10px);
         }
-        
         .summary-item h3 {
             margin: 0 0 5px 0;
             font-size: 1.8em;
             font-weight: bold;
         }
-        
         .summary-item p {
             margin: 0;
             opacity: 0.9;
         }
-        
         input, select {
             width: 100%;
             padding: 8px;
@@ -241,13 +208,11 @@
             border-radius: 5px;
             font-size: 14px;
         }
-        
         input:focus, select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
         }
-        
         .add-row-btn {
             background: #28a745;
             color: white;
@@ -259,20 +224,16 @@
             font-weight: 600;
             transition: background 0.3s ease;
         }
-        
         .add-row-btn:hover {
             background: #218838;
         }
-        
         @media (max-width: 768px) {
             .tabs {
                 flex-direction: column;
             }
-            
             .tab {
                 padding: 15px;
             }
-            
             .summary-grid {
                 grid-template-columns: 1fr;
             }
@@ -492,10 +453,11 @@
             remate: []
         };
         
-        // Cargar datos guardados al iniciar
+        // Cargar datos guardados al iniciar (ahora con localStorage)
         function loadSavedData() {
-            const saved = JSON.parse(sessionStorage.getItem('eventData') || '{}');
-            if (Object.keys(saved).length > 0) {
+            const savedRaw = localStorage.getItem('eventData');
+            if (savedRaw) {
+                const saved = JSON.parse(savedRaw);
                 eventData = { ...eventData, ...saved };
                 console.log('Datos cargados:', eventData);
                 return true;
@@ -503,9 +465,9 @@
             return false;
         }
         
-        // Guardar datos automáticamente
+        // Guardar datos automáticamente (ahora con localStorage)
         function saveData() {
-            sessionStorage.setItem('eventData', JSON.stringify(eventData));
+            localStorage.setItem('eventData', JSON.stringify(eventData));
             console.log('Datos guardados automáticamente');
         }
         
@@ -553,233 +515,219 @@
             
             // Activar el botón de la pestaña correspondiente
             document.querySelectorAll('.tab').forEach((tab, index) => {
-                const tabs = ['chiva1', 'chiva2', 'chiva3', 'remate'];
-                if (tabs[index] === tabName) {
+                if (tab.textContent.toLowerCase().includes(tabName)) {
                     tab.classList.add('active');
                 }
             });
+            
+            // Actualizar resumen al cambiar de pestaña
+            updateSummary(tabName);
         }
         
-        // Agregar fila con datos específicos
-        function addRowWithData(tableName, index, data) {
+        // Agregar fila vacía (por botón)
+        function addRow(tableName, silent = false) {
             const tableBody = document.querySelector(`#table-${tableName} tbody`);
-            const rowCount = index + 1;
+            const index = tableBody.rows.length;
             
-            const row = document.createElement('tr');
+            // Añadir objeto vacío en eventData para esa fila
+            if (!eventData[tableName]) eventData[tableName] = [];
+            eventData[tableName].push({
+                nombre: '',
+                telefono: '',
+                email: '',
+                valor: '',
+                estado: 'Pendiente',
+                fecha: '',
+                observaciones: '',
+                articulo: '' // Solo para remate
+            });
             
+            addRowWithData(tableName, index, eventData[tableName][index]);
+            
+            if (!silent) saveData();
+        }
+        
+        // Agregar fila con datos (llenar inputs)
+        function addRowWithData(tableName, index, rowData) {
+            const tableBody = document.querySelector(`#table-${tableName} tbody`);
+            
+            const tr = document.createElement('tr');
+            
+            // Número fila
+            const tdNum = document.createElement('td');
+            tdNum.textContent = index + 1;
+            tr.appendChild(tdNum);
+            
+            // Nombre Completo
+            const tdNombre = document.createElement('td');
+            const inputNombre = document.createElement('input');
+            inputNombre.type = 'text';
+            inputNombre.value = rowData.nombre || '';
+            inputNombre.placeholder = 'Nombre completo';
+            inputNombre.oninput = () => updateData(tableName, index, 'nombre', inputNombre.value);
+            tdNombre.appendChild(inputNombre);
+            tr.appendChild(tdNombre);
+            
+            // Teléfono
+            const tdTelefono = document.createElement('td');
+            const inputTelefono = document.createElement('input');
+            inputTelefono.type = 'tel';
+            inputTelefono.value = rowData.telefono || '';
+            inputTelefono.placeholder = 'Teléfono';
+            inputTelefono.oninput = () => updateData(tableName, index, 'telefono', inputTelefono.value);
+            tdTelefono.appendChild(inputTelefono);
+            tr.appendChild(tdTelefono);
+            
+            // Email
+            const tdEmail = document.createElement('td');
+            const inputEmail = document.createElement('input');
+            inputEmail.type = 'email';
+            inputEmail.value = rowData.email || '';
+            inputEmail.placeholder = 'Email';
+            inputEmail.oninput = () => updateData(tableName, index, 'email', inputEmail.value);
+            tdEmail.appendChild(inputEmail);
+            tr.appendChild(tdEmail);
+            
+            // Valor / Valor Ofrecido
+            const tdValor = document.createElement('td');
+            const inputValor = document.createElement('input');
+            inputValor.type = 'number';
+            inputValor.min = 0;
+            inputValor.value = rowData.valor || '';
+            inputValor.placeholder = 'Valor';
+            inputValor.oninput = () => updateData(tableName, index, 'valor', inputValor.value);
+            tdValor.appendChild(inputValor);
+            tr.appendChild(tdValor);
+            
+            // Estado (select)
+            const tdEstado = document.createElement('td');
+            const selectEstado = document.createElement('select');
+            selectEstado.className = 'status-select';
+            ['Pendiente', 'Pagado', 'Cancelado'].forEach(status => {
+                const option = document.createElement('option');
+                option.value = status;
+                option.textContent = status;
+                selectEstado.appendChild(option);
+            });
+            selectEstado.value = rowData.estado || 'Pendiente';
+            selectEstado.onchange = () => updateData(tableName, index, 'estado', selectEstado.value);
+            tdEstado.appendChild(selectEstado);
+            tr.appendChild(tdEstado);
+            
+            // Fecha Pago
+            const tdFecha = document.createElement('td');
+            const inputFecha = document.createElement('input');
+            inputFecha.type = 'date';
+            inputFecha.value = rowData.fecha || '';
+            inputFecha.oninput = () => updateData(tableName, index, 'fecha', inputFecha.value);
+            tdFecha.appendChild(inputFecha);
+            tr.appendChild(tdFecha);
+            
+            // Artículo / Premio (solo remate)
             if (tableName === 'remate') {
-                row.innerHTML = `
-                    <td>${rowCount}</td>
-                    <td><input type="text" placeholder="Nombre completo" value="${data.nombre || ''}" onchange="updateData('${tableName}', ${index}, 'nombre', this.value)"></td>
-                    <td><input type="tel" placeholder="Teléfono" value="${data.telefono || ''}" onchange="updateData('${tableName}', ${index}, 'telefono', this.value)"></td>
-                    <td><input type="email" placeholder="Email" value="${data.email || ''}" onchange="updateData('${tableName}', ${index}, 'email', this.value)"></td>
-                    <td><input type="number" placeholder="0" value="${data.valor || ''}" onchange="updateData('${tableName}', ${index}, 'valor', this.value); updateSummary('${tableName}')"></td>
-                    <td>
-                        <select onchange="updateData('${tableName}', ${index}, 'estado', this.value); updateSummary('${tableName}'); updateRowStyle(this)">
-                            <option value="pendiente" ${data.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
-                            <option value="pagado" ${data.estado === 'pagado' ? 'selected' : ''}>Pagado</option>
-                            <option value="cancelado" ${data.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
-                        </select>
-                    </td>
-                    <td><input type="date" value="${data.fecha || ''}" onchange="updateData('${tableName}', ${index}, 'fecha', this.value)"></td>
-                    <td><input type="text" placeholder="Artículo o premio" value="${data.articulo || ''}" onchange="updateData('${tableName}', ${index}, 'articulo', this.value)"></td>
-                    <td><input type="text" placeholder="Observaciones" value="${data.observaciones || ''}" onchange="updateData('${tableName}', ${index}, 'observaciones', this.value)"></td>
-                `;
-            } else {
-                row.innerHTML = `
-                    <td>${rowCount}</td>
-                    <td><input type="text" placeholder="Nombre completo" value="${data.nombre || ''}" onchange="updateData('${tableName}', ${index}, 'nombre', this.value)"></td>
-                    <td><input type="tel" placeholder="Teléfono" value="${data.telefono || ''}" onchange="updateData('${tableName}', ${index}, 'telefono', this.value)"></td>
-                    <td><input type="email" placeholder="Email" value="${data.email || ''}" onchange="updateData('${tableName}', ${index}, 'email', this.value)"></td>
-                    <td><input type="number" placeholder="0" value="${data.valor || ''}" onchange="updateData('${tableName}', ${index}, 'valor', this.value); updateSummary('${tableName}')"></td>
-                    <td>
-                        <select onchange="updateData('${tableName}', ${index}, 'estado', this.value); updateSummary('${tableName}'); updateRowStyle(this)">
-                            <option value="pendiente" ${data.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
-                            <option value="pagado" ${data.estado === 'pagado' ? 'selected' : ''}>Pagado</option>
-                            <option value="cancelado" ${data.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
-                        </select>
-                    </td>
-                    <td><input type="date" value="${data.fecha || ''}" onchange="updateData('${tableName}', ${index}, 'fecha', this.value)"></td>
-                    <td><input type="text" placeholder="Observaciones" value="${data.observaciones || ''}" onchange="updateData('${tableName}', ${index}, 'observaciones', this.value)"></td>
-                `;
+                const tdArticulo = document.createElement('td');
+                const inputArticulo = document.createElement('input');
+                inputArticulo.type = 'text';
+                inputArticulo.value = rowData.articulo || '';
+                inputArticulo.placeholder = 'Artículo / Premio';
+                inputArticulo.oninput = () => updateData(tableName, index, 'articulo', inputArticulo.value);
+                tdArticulo.appendChild(inputArticulo);
+                tr.appendChild(tdArticulo);
             }
             
-            tableBody.appendChild(row);
+            // Observaciones
+            const tdObs = document.createElement('td');
+            const inputObs = document.createElement('input');
+            inputObs.type = 'text';
+            inputObs.value = rowData.observaciones || '';
+            inputObs.placeholder = 'Observaciones';
+            inputObs.oninput = () => updateData(tableName, index, 'observaciones', inputObs.value);
+            tdObs.appendChild(inputObs);
+            tr.appendChild(tdObs);
             
-            // Aplicar estilo según el estado
-            if (data.estado) {
-                const select = row.querySelector('select');
-                updateRowStyle(select);
-            }
-            
-            // Inicializar datos si no existen
-            if (!eventData[tableName][index]) {
-                eventData[tableName][index] = {
-                    nombre: data.nombre || '',
-                    telefono: data.telefono || '',
-                    email: data.email || '',
-                    valor: data.valor || 0,
-                    estado: data.estado || 'pendiente',
-                    fecha: data.fecha || '',
-                    observaciones: data.observaciones || '',
-                    ...(tableName === 'remate' && { articulo: data.articulo || '' })
-                };
-            }
-        }
-            const tableBody = document.querySelector(`#table-${tableName} tbody`);
-            const rowCount = tableBody.children.length + 1;
-            
-        // Agregar fila vacía
-        function addRow(tableName, initial = false) {
-            const tableBody = document.querySelector(`#table-${tableName} tbody`);
-            const rowCount = tableBody.children.length + 1;
-            
-            addRowWithData(tableName, rowCount - 1, {});
-            
-            if (!initial) {
-                updateSummary(tableName);
-                saveData(); // Guardar cuando se agrega una nueva fila
-            }
+            tableBody.appendChild(tr);
         }
         
-        // Actualizar datos y guardar automáticamente
+        // Actualizar datos al escribir
         function updateData(tableName, index, field, value) {
-            if (!eventData[tableName][index]) {
-                eventData[tableName][index] = {};
-            }
+            if (!eventData[tableName]) eventData[tableName] = [];
+            if (!eventData[tableName][index]) eventData[tableName][index] = {};
             eventData[tableName][index][field] = value;
-            
-            // Guardar automáticamente cada vez que se actualiza un dato
             saveData();
+            updateSummary(tableName);
         }
         
-        // Actualizar estilo de fila según estado
-        function updateRowStyle(selectElement) {
-            const row = selectElement.closest('tr');
-            row.className = ''; // Limpiar clases
-            
-            if (selectElement.value === 'pagado') {
-                row.classList.add('status-pagado');
-            } else if (selectElement.value === 'pendiente') {
-                row.classList.add('status-pendiente');
-            } else if (selectElement.value === 'cancelado') {
-                row.classList.add('status-cancelado');
-            }
-        }
-        
-        // Actualizar resumen con autoguardado
+        // Actualizar resumen estadístico
         function updateSummary(tableName) {
-            const data = eventData[tableName].filter(item => item && item.nombre);
-            const total = data.length;
-            const pagados = data.filter(item => item.estado === 'pagado').length;
-            const pendientes = data.filter(item => item.estado === 'pendiente').length;
-            const ingresos = data.filter(item => item.estado === 'pagado')
-                                .reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0);
+            const data = eventData[tableName] || [];
+            const total = data.filter(d => d.nombre && d.nombre.trim() !== '').length;
+            const pagados = data.filter(d => d.estado === 'Pagado').length;
+            const pendientes = data.filter(d => d.estado === 'Pendiente').length;
+            const ingresos = data.reduce((acc, d) => {
+                if (d.estado === 'Pagado' && d.valor) return acc + Number(d.valor);
+                return acc;
+            }, 0);
             
             document.getElementById(`total-${tableName}`).textContent = total;
             document.getElementById(`pagados-${tableName}`).textContent = pagados;
             document.getElementById(`pendientes-${tableName}`).textContent = pendientes;
-            document.getElementById(`ingresos-${tableName}`).textContent = `${ingresos.toLocaleString()}`;
-            
-            // Guardar datos después de actualizar resumen
-            saveData();
+            document.getElementById(`ingresos-${tableName}`).textContent = `$${ingresos.toLocaleString('es-CO')}`;
         }
         
-        // Exportar a Excel
+        // Exportar todo a Excel
         function exportToExcel() {
             const wb = XLSX.utils.book_new();
-            
-            // Crear hojas para cada tabla
-            ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(function(tableName) {
-                const data = eventData[tableName].filter(function(item) { 
-                    return item && (item.nombre || item.telefono || item.email); 
-                });
-                
-                let headers, wsData;
-                
-                if (tableName === 'remate') {
-                    headers = ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor Ofrecido', 'Estado', 'Fecha Pago', 'Artículo/Premio', 'Observaciones'];
-                    wsData = data.map(function(item, index) {
-                        return [
-                            index + 1,
-                            item.nombre || '',
-                            item.telefono || '',
-                            item.email || '',
-                            item.valor || 0,
-                            item.estado || 'pendiente',
-                            item.fecha || '',
-                            item.articulo || '',
-                            item.observaciones || ''
-                        ];
+            ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(section => {
+                const data = eventData[section] || [];
+                const ws_data = [];
+                if(section !== 'remate'){
+                    ws_data.push(['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones']);
+                    data.forEach((row, i) => {
+                        ws_data.push([
+                            i + 1,
+                            row.nombre || '',
+                            row.telefono || '',
+                            row.email || '',
+                            row.valor || '',
+                            row.estado || '',
+                            row.fecha || '',
+                            row.observaciones || ''
+                        ]);
                     });
                 } else {
-                    headers = ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones'];
-                    wsData = data.map(function(item, index) {
-                        return [
-                            index + 1,
-                            item.nombre || '',
-                            item.telefono || '',
-                            item.email || '',
-                            item.valor || 0,
-                            item.estado || 'pendiente',
-                            item.fecha || '',
-                            item.observaciones || ''
-                        ];
+                    ws_data.push(['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor Ofrecido', 'Estado', 'Fecha Pago', 'Artículo/Premio', 'Observaciones']);
+                    data.forEach((row, i) => {
+                        ws_data.push([
+                            i + 1,
+                            row.nombre || '',
+                            row.telefono || '',
+                            row.email || '',
+                            row.valor || '',
+                            row.estado || '',
+                            row.fecha || '',
+                            row.articulo || '',
+                            row.observaciones || ''
+                        ]);
                     });
                 }
-                
-                const finalData = [headers, ...wsData];
-                const ws = XLSX.utils.aoa_to_sheet(finalData);
-                
-                // Establecer ancho de columnas
-                const colWidths = headers.map(function() { return { wch: 15 }; });
-                ws['!cols'] = colWidths;
-                
-                // Agregar la hoja al libro
-                const sheetName = tableName === 'remate' ? 'Remate' : 'Chiva ' + tableName.slice(-1);
-                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                const ws = XLSX.utils.aoa_to_sheet(ws_data);
+                XLSX.utils.book_append_sheet(wb, ws, section.charAt(0).toUpperCase() + section.slice(1));
             });
             
-            // Descargar el archivo
-            const fileName = 'Registro_Pagos_Evento_' + new Date().toISOString().split('T')[0] + '.xlsx';
-            XLSX.writeFile(wb, fileName);
+            XLSX.writeFile(wb, 'registro_evento.xlsx');
         }
         
-        // Limpiar todos los datos
+        // Limpiar todo (localStorage + tabla + eventData)
         function clearAllData() {
-            if (confirm('¿Estás seguro de que quieres borrar todos los datos? Esta acción no se puede deshacer.')) {
-                // Limpiar datos
-                eventData = {
-                    chiva1: [],
-                    chiva2: [],
-                    chiva3: [],
-                    remate: []
-                };
-                
-                // Limpiar almacenamiento
-                sessionStorage.removeItem('eventData');
-                
-                // Reinicializar tablas
+            if(confirm('¿Estás seguro de que quieres eliminar todos los datos? Esta acción no se puede deshacer.')) {
+                localStorage.removeItem('eventData');
+                eventData = { chiva1: [], chiva2: [], chiva3: [], remate: [] };
                 initializeTables();
-                
-                // Actualizar resúmenes
-                ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(function(tableName) {
-                    updateSummary(tableName);
-                });
-                
-                alert('¡Todos los datos han sido eliminados!');
             }
         }
         
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeTables();
-            
-            // Actualizar resúmenes iniciales
-            ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(function(tableName) {
-                updateSummary(tableName);
-            });
-        });
+        // Iniciar la app
+        initializeTables();
     </script>
 </body>
 </html>
