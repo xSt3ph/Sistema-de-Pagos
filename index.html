@@ -447,6 +447,8 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzb1TUE7Bk9mlKHHQI65tG4Ql6HLnv3Pj2RXfpNYYNOF_r01JTLlAo4ipW18o_2toCUJA/exec';
+
         let eventData = {
             chiva1: [],
             chiva2: [],
@@ -454,30 +456,46 @@
             remate: []
         };
 
-        // Cargar datos guardados al iniciar (localStorage)
-        function loadSavedData() {
-            const savedRaw = localStorage.getItem('eventData');
-            if (savedRaw) {
-                try {
-                    const saved = JSON.parse(savedRaw);
-                    eventData = { ...eventData, ...saved };
-                    return true;
-                } catch {
-                    console.warn("Error al parsear los datos guardados");
+        // Cargar datos guardados al iniciar (desde Google Sheets)
+        async function loadSavedData() {
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                if (data.error) {
+                    console.warn("Error API:", data.error);
                     return false;
                 }
+                eventData = { ...eventData, ...data };
+                return true;
+            } catch (error) {
+                console.warn("Error al cargar datos desde API:", error);
+                return false;
             }
-            return false;
         }
 
-        // Guardar datos en localStorage
-        function saveData() {
-            localStorage.setItem('eventData', JSON.stringify(eventData));
+        // Guardar datos en Google Sheets (una sola llamada guarda todo)
+        async function saveData() {
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(eventData)
+                });
+                const result = await res.json();
+                if (result.error) {
+                    alert("Error guardando datos: " + result.error);
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                alert("Error guardando datos: " + error.message);
+                return false;
+            }
         }
 
         // Inicializar tablas con datos o filas vacías
-        function initializeTables() {
-            const hasData = loadSavedData();
+        async function initializeTables() {
+            const hasData = await loadSavedData();
             ['chiva1', 'chiva2', 'chiva3', 'remate'].forEach(table => {
                 if (hasData && eventData[table] && eventData[table].length > 0) {
                     loadTableData(table);
@@ -494,49 +512,20 @@
         function loadTableData(tableName) {
             const tbody = document.querySelector(`#table-${tableName} tbody`);
             tbody.innerHTML = '';
-            const data = eventData[tableName];
-            for (let i = 0; i < Math.max(data.length, 20); i++) {
-                addRowWithData(tableName, i, data[i] || {});
-            }
+            eventData[tableName].forEach((row, index) => {
+                addRowWithData(tableName, index, row);
+            });
             updateSummary(tableName);
         }
 
-        // Mostrar pestaña seleccionada
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tc => {
-                tc.classList.toggle('active', tc.id === tabName);
-            });
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.toggle('active', tab.dataset.tab === tabName);
-            });
-            updateSummary(tabName);
-        }
-
-        // Asignar evento click a pestañas
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                showTab(tab.dataset.tab);
-            });
-        });
-
-        // Añadir fila vacía
-        function addRow(tableName, silent = false) {
-            if (!eventData[tableName]) eventData[tableName] = [];
-            eventData[tableName].push({});
-            if (!silent) loadTableData(tableName);
-            else addRowWithData(tableName, eventData[tableName].length - 1, {});
-        }
-
-        // Añadir fila con datos (obj)
+        // Añadir fila con datos a tabla
         function addRowWithData(tableName, index, data) {
             const tbody = document.querySelector(`#table-${tableName} tbody`);
             const tr = document.createElement('tr');
-            // Número (índice+1)
             const tdIndex = document.createElement('td');
             tdIndex.textContent = index + 1;
             tr.appendChild(tdIndex);
 
-            // Campos dependiendo tabla
             const fields = {
                 chiva1: ['nombre', 'telefono', 'email', 'valor', 'estado', 'fechaPago', 'observaciones'],
                 chiva2: ['nombre', 'telefono', 'email', 'valor', 'estado', 'fechaPago', 'observaciones'],
@@ -558,7 +547,7 @@
                         select.appendChild(option);
                     });
                     select.value = data[key] || 'Pendiente';
-                    // Colores según estado
+
                     function updateColor() {
                         select.classList.remove('status-pagado', 'status-pendiente', 'status-cancelado');
                         if (select.value === 'Pagado') select.classList.add('status-pagado');
@@ -566,50 +555,59 @@
                         else if (select.value === 'Cancelado') select.classList.add('status-cancelado');
                     }
                     updateColor();
-                    select.addEventListener('change', () => {
+
+                    select.addEventListener('change', async () => {
                         eventData[tableName][index][key] = select.value;
                         updateColor();
                         updateSummary(tableName);
-                        saveData();
+                        await saveData();
                     });
                     td.appendChild(select);
                 } else {
                     const input = document.createElement('input');
-                    input.type = (key === 'valor') ? 'number' : 'text';
-                    if (key === 'fechaPago') input.type = 'date';
+                    if (key === 'valor') input.type = 'number';
+                    else if (key === 'fechaPago') input.type = 'date';
+                    else input.type = 'text';
+
                     input.value = data[key] || '';
-                    input.placeholder = key === 'articulo' ? 'Artículo / Premio' : '';
-                    input.addEventListener('input', () => {
+                    input.placeholder = (key === 'articulo') ? 'Artículo / Premio' : '';
+                    input.addEventListener('input', async () => {
                         eventData[tableName][index][key] = input.value;
                         updateSummary(tableName);
-                        saveData();
+                        await saveData();
                     });
                     td.appendChild(input);
                 }
                 tr.appendChild(td);
             });
+
             tbody.appendChild(tr);
         }
 
-        // Actualizar resumen de una pestaña
+        // Añadir nueva fila vacía
+        function addRow(tableName, silent = false) {
+            if (!eventData[tableName]) eventData[tableName] = [];
+            eventData[tableName].push({});
+            if (!silent) {
+                loadTableData(tableName);
+                saveData();
+            } else {
+                addRowWithData(tableName, eventData[tableName].length - 1, {});
+            }
+        }
+
+        // Actualizar resumen de una tabla
         function updateSummary(tableName) {
             const data = eventData[tableName];
-            if (!data) return;
             const total = data.length;
-            let pagados = 0;
-            let pendientes = 0;
-            let ingresos = 0;
-
-            data.forEach(item => {
-                if (!item) return;
-                const estado = item.estado || 'Pendiente';
-                if (estado === 'Pagado') {
-                    pagados++;
-                    ingresos += Number(item.valor || 0);
-                } else if (estado === 'Pendiente') {
-                    pendientes++;
+            const pagados = data.filter(item => item.estado === 'Pagado').length;
+            const pendientes = data.filter(item => item.estado === 'Pendiente').length;
+            const ingresos = data.reduce((acc, item) => {
+                if (item.estado === 'Pagado' && item.valor) {
+                    return acc + Number(item.valor);
                 }
-            });
+                return acc;
+            }, 0);
 
             document.getElementById(`total-${tableName}`).textContent = total;
             document.getElementById(`pagados-${tableName}`).textContent = pagados;
@@ -617,49 +615,71 @@
             document.getElementById(`ingresos-${tableName}`).textContent = '$' + ingresos.toLocaleString();
         }
 
-        // Exportar a Excel usando SheetJS
+        // Cambiar pestaña activa
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === tabName);
+            });
+        }
+
+        // Exportar todo a Excel
         function exportToExcel() {
             const wb = XLSX.utils.book_new();
 
-            for (const tableName in eventData) {
-                const data = eventData[tableName];
-                if (!data || data.length === 0) continue;
-                const headers = {
-                    chiva1: ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones'],
-                    chiva2: ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones'],
-                    chiva3: ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones'],
-                    remate: ['#', 'Nombre Completo', 'Teléfono', 'Email', 'Valor Ofrecido', 'Estado', 'Fecha Pago', 'Artículo/Premio', 'Observaciones']
+            Object.keys(eventData).forEach(sheetName => {
+                const data = eventData[sheetName];
+                const fields = {
+                    chiva1: ['Nombre', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones'],
+                    chiva2: ['Nombre', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones'],
+                    chiva3: ['Nombre', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Observaciones'],
+                    remate: ['Nombre', 'Teléfono', 'Email', 'Valor', 'Estado', 'Fecha Pago', 'Artículo/Premio', 'Observaciones']
                 };
-                const ws_data = [headers[tableName]];
-                data.forEach((item, i) => {
-                    if (!item) return;
-                    const row = [i + 1];
-                    if (tableName !== 'remate') {
-                        row.push(item.nombre || '', item.telefono || '', item.email || '', item.valor || '', item.estado || '', item.fechaPago || '', item.observaciones || '');
-                    } else {
-                        row.push(item.nombre || '', item.telefono || '', item.email || '', item.valor || '', item.estado || '', item.fechaPago || '', item.articulo || '', item.observaciones || '');
-                    }
-                    ws_data.push(row);
-                });
-                const ws = XLSX.utils.aoa_to_sheet(ws_data);
-                XLSX.utils.book_append_sheet(wb, ws, tableName.toUpperCase());
-            }
-            XLSX.writeFile(wb, 'RegistroPagos_Evento.xlsx');
+
+                const keys = {
+                    chiva1: ['nombre', 'telefono', 'email', 'valor', 'estado', 'fechaPago', 'observaciones'],
+                    chiva2: ['nombre', 'telefono', 'email', 'valor', 'estado', 'fechaPago', 'observaciones'],
+                    chiva3: ['nombre', 'telefono', 'email', 'valor', 'estado', 'fechaPago', 'observaciones'],
+                    remate: ['nombre', 'telefono', 'email', 'valor', 'estado', 'fechaPago', 'articulo', 'observaciones']
+                };
+
+                const header = fields[sheetName];
+                const rows = data.map(row => keys[sheetName].map(k => row[k] || ''));
+
+                const worksheetData = [header, ...rows];
+                const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+                XLSX.utils.book_append_sheet(wb, ws, sheetName.toUpperCase());
+            });
+
+            XLSX.writeFile(wb, 'registro_pagos_evento.xlsx');
         }
 
-        // Limpiar todos los datos (confirmar)
-        function clearAllData() {
-            if (confirm('¿Estás seguro de limpiar todos los datos? Esta acción no se puede deshacer.')) {
-                eventData = { chiva1: [], chiva2: [], chiva3: [], remate: [] };
-                localStorage.removeItem('eventData');
+        // Limpiar todo (vaciar datos y refrescar tablas)
+        async function clearAllData() {
+            if (confirm("¿Estás seguro de borrar TODOS los datos? Esta acción no se puede deshacer.")) {
+                eventData = {
+                    chiva1: [],
+                    chiva2: [],
+                    chiva3: [],
+                    remate: []
+                };
+                await saveData();
                 initializeTables();
-                showTab('chiva1');
             }
         }
 
-        // Inicializar todo al cargar
-        window.onload = () => {
-            initializeTables();
+        // Manejar cambio de pestañas
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                showTab(tab.dataset.tab);
+            });
+        });
+
+        // Al cargar la página inicializamos
+        window.onload = async () => {
+            await initializeTables();
             showTab('chiva1');
         };
     </script>
